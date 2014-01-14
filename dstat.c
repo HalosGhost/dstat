@@ -72,9 +72,10 @@ int main (int argc, char ** argv)
         // Clock //
         time(&current);
         strftime(clck, 37, "%H.%M | %A, %d %B %Y", localtime(&current));
-        snprintf(forth, sizeof(forth), "%s | %s\n", back, clck);
+        snprintf(forth, sizeof(forth), "%s | %s", back, clck);
         _setStatus(forth);
     }
+	XCloseDisplay(dpy);
     return 0;
 }
 
