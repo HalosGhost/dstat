@@ -1,5 +1,5 @@
 CFLAGS  +=  -Os -Wall
-PROG    =   slstat
+PROG    =   dstat
 PREFIX  ?=  /usr
 VER     =   1.0
 LIBS	  =	-lX11

@@ -80,7 +80,7 @@ int main (int argc, char ** argv)
 
 // Usage //
 void _usage (void)
-{   fprintf(stderr, "Usage: slstat [-h|--help]\n");
+{   fprintf(stderr, "Usage: dstat [-h|--help]\n");
     exit(0);
 }
 
