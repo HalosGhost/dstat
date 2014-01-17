@@ -22,7 +22,7 @@ static FILE * in;
 static char stat, clck[38] = "", back[70] = "", forth[70] = "";
 static int n;
 static time_t current;
-static Display *dpy;
+static Display * display;
 
 // Prototypes //
 void _usage (void);
@@ -32,7 +32,7 @@ void _setStatus (char * statusOut);
 int main (int argc, char ** argv)
 {   if ( argc > 1 ) _usage();
 
-    if ( !(dpy = XOpenDisplay(NULL)) )
+    if ( !(display = XOpenDisplay(NULL)) )
     {   fprintf(stderr, "could not open display\n");
         return 1;
     }
@@ -48,14 +48,14 @@ int main (int argc, char ** argv)
         if ( (in = fopen(wifiStat, "r")) )
         {   n = 0;
             fscanf(in, "%*[^\n]\n%*[^\n]\nwlan0: %*d %d.", &n); fclose(in);
-            if ( n > 0 ) snprintf(forth, sizeof(forth), "%s | W: %d", back, n);
-            else snprintf(forth, sizeof(forth), "%s | W: D", back);
+            snprintf(forth, sizeof(forth), "%s | W: %d", back, n);
         }
 
         // Volume Monitor //
         if ( (in = popen("ponymix get-volume", "r")) )
         {   fscanf(in, "%d", &n); pclose(in);
-            snprintf(back, sizeof(back), "%s | A: %d%s", forth, n, ( system("ponymix is-muted") ? "" : "M"));
+            int isMuted = system("ponymix is-muted");
+            snprintf(back, sizeof(back), "%s | A: %d%s", forth, n, ( isMuted ? "" : "M"));
         }
 
         // Battery Monitor //
@@ -75,7 +75,7 @@ int main (int argc, char ** argv)
         snprintf(forth, sizeof(forth), "%s | %s", back, clck);
         _setStatus(forth);
     }
-	XCloseDisplay(dpy);
+    XCloseDisplay(display);
     return 0;
 }
 
@@ -87,7 +87,7 @@ void _usage (void)
 
 // Set Status //
 void _setStatus (char * statusOut)
-{   XStoreName(dpy, DefaultRootWindow(dpy), statusOut);
-    XSync(dpy, False);
+{   XStoreName(display, DefaultRootWindow(display), statusOut);
+    XSync(display, False);
 }
 // vim:set ts=4 sw=4 et:
