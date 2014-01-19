@@ -53,7 +53,8 @@ int main (int argc, char ** argv)
 
         // Volume Monitor //
         if ( (in = popen("ponymix get-volume", "r")) )
-        {   fscanf(in, "%d", &n); pclose(in);
+        {   n = 0;
+			fscanf(in, "%d", &n); pclose(in);
             int isMuted = system("ponymix is-muted");
             snprintf(back, sizeof(back), "%s | A: %d%s", forth, n, ( isMuted ? "" : "M"));
         }
