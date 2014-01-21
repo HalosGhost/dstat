@@ -9,7 +9,6 @@ Each monitor is fairly self-explanatory, though the setup is currently specific 
 
 To-Do
 =====
-#. Simplify the buffer passing between monitors through ``snprintf()`` (will increase stability in the case of a particular monitor failing)
 #. Remove dependency on ``ponymix`` in favor of using ``pactl`` and/or ``pacmd`` (will remove a run-time dependency and make use more generalizable)
 #. Add support for symbolic representation rather than letter prefixes (decreases size of buffer while increasing readbility)
 #. Add support for color escapes (not sure if this is a good idea)

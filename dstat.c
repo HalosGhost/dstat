@@ -42,13 +42,15 @@ int main (int argc, char ** argv)
         if ( (in = fopen(wireStat, "r")) )
         {   fscanf(in, "%c", &stat); fclose(in);
             snprintf(back, sizeof(back), "E: %s", ( stat == 'u' ? "U" : "D" ));
+            snprintf(forth, sizeof(forth), back);
         }
 
         // Wi-Fi Interface //
         if ( (in = fopen(wifiStat, "r")) )
         {   n = 0;
             fscanf(in, "%*[^\n]\n%*[^\n]\nwlan0: %*d %d.", &n); fclose(in);
-            snprintf(forth, sizeof(forth), "%s | W: %d", back, n);
+            snprintf(back, sizeof(back), "%s | W: %d", forth, n);
+            snprintf(forth, sizeof(forth), back);
         }
 
         // Volume Monitor //
@@ -57,6 +59,7 @@ int main (int argc, char ** argv)
 			fscanf(in, "%d", &n); pclose(in);
             int isMuted = system("ponymix is-muted");
             snprintf(back, sizeof(back), "%s | A: %d%s", forth, n, ( isMuted ? "" : "M"));
+            snprintf(forth, sizeof(forth), back);
         }
 
         // Battery Monitor //
@@ -68,13 +71,14 @@ int main (int argc, char ** argv)
                 fclose(in);
             }
             snprintf(back, sizeof(back), "%s%s", forth, ( stat == 'C' ? "C" : "" ));
+            snprintf(forth, sizeof(forth), back);
         }
 
         // Clock //
         time(&current);
         strftime(clck, 37, "%H.%M | %A, %d %B %Y", localtime(&current));
-        snprintf(forth, sizeof(forth), "%s | %s", back, clck);
-        _setStatus(forth);
+        snprintf(back, sizeof(back), "%s | %s", forth, clck);
+        _setStatus(back);
     }
     XCloseDisplay(display);
     return 0;
