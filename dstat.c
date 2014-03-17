@@ -49,7 +49,7 @@ int main (int argc, char ** argv)
         if ( (in = fopen(wifiStat, "r")) )
         {   n = 0;
             fscanf(in, "%*[^\n]\n%*[^\n]\nwlan0: %*d %d.", &n); fclose(in);
-            snprintf(back, sizeof(back), "%s | W: %3g", forth, (double )n/70 * 100);
+            snprintf(back, sizeof(back), "%s | W: %.3g", forth, (double )n/70 * 100);
             snprintf(forth, sizeof(forth), back);
         }
 
