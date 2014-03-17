@@ -19,7 +19,7 @@ static const char * battStat = "/sys/class/power_supply/BAT0/status";
 
 // Variables //
 static FILE * in;
-static char stat, clck[38] = "", back[70] = "", forth[70] = "";
+static char stat, clck[38] = "", back[72] = "", forth[72] = "";
 static int n;
 static time_t current;
 static Display * display;
@@ -37,7 +37,7 @@ int main (int argc, char ** argv)
         return 1;
     }
 
-    for ( ; ; sleep(15) )
+    for ( ; ; sleep(6) )
     {   // Wired Interface //
         if ( (in = fopen(wireStat, "r")) )
         {   fscanf(in, "%c", &stat); fclose(in);
@@ -49,7 +49,7 @@ int main (int argc, char ** argv)
         if ( (in = fopen(wifiStat, "r")) )
         {   n = 0;
             fscanf(in, "%*[^\n]\n%*[^\n]\nwlan0: %*d %d.", &n); fclose(in);
-            snprintf(back, sizeof(back), "%s | W: %d", forth, n);
+            snprintf(back, sizeof(back), "%s | W: %3g", forth, (double )n/70 * 100);
             snprintf(forth, sizeof(forth), back);
         }
 
