@@ -3,82 +3,73 @@
 * License: GPLv2 Sam Stuewe, 2014 *
 \*********************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <time.h>
-#include <sys/times.h>
-#include <X11/Xlib.h>
+#include <stdint.h>   // int32_t
+#include <stdio.h>    // fputs(), fopen(), fscanf(), fclose(), popen(), pclose()
+#include <unistd.h>   // sleep()
+#include <stdbool.h>  // bool
+#include <stdlib.h>   // system()
+#include <time.h>     // time_t, time(), strftime(), localtime()
+#include <X11/Xlib.h> // Display, XOpenDisplay(), XStoreName(),
+                      // DefaultRootWindow(), XSync(), XCloseDisplay()
 
 // Input Files //
-static const char * wireStat = "/sys/class/net/eth0/operstate";
-static const char * wifiStat = "/proc/net/wireless";
-static const char * battNow  = "/sys/class/power_supply/BAT0/capacity";
-static const char * battStat = "/sys/class/power_supply/BAT0/status";
-
-// Variables //
-static FILE * in;
-static char stat, clck[38] = "", back[72] = "", forth[72] = "";
-static int n;
-static time_t current;
-static Display * display;
+#define EFACE "enp0s25"
+#define WFACE "wlp3s0"
+#define BAT   "BAT0"
 
 // Main Function //
-int main (int argc, char ** argv)
-{   if ( argc > 1 ) _usage();
+int32_t
+main (void) {
 
-    if ( !(display = XOpenDisplay(NULL)) )
-    {   fprintf(stderr, "could not open display\n");
+    Display * display;
+    if ( !(display = XOpenDisplay(NULL)) ) {
+        fputs("Could not open display\n", stderr);
         return 1;
     }
 
-    for ( ; ; sleep(6) )
-    {   // Wired Interface //
-        if ( (in = fopen(wireStat, "r")) )
-        {   fscanf(in, "%c", &stat); fclose(in);
-            snprintf(back, sizeof(back), "E: %s", ( stat == 'u' ? "U" : "D" ));
-            snprintf(forth, sizeof(forth), back);
-        }
+    int32_t wr, n = 0;
+    uint32_t len = 75;
+    char stat = 0, line [len];
+    time_t current;
 
-        // Wi-Fi Interface //
-        if ( (in = fopen(wifiStat, "r")) )
-        {   n = 0;
-            fscanf(in, "%*[^\n]\n%*[^\n]\nwlan0: %*d %d.", &n); fclose(in);
-            snprintf(back, sizeof(back), "%s | W: %.3g", forth, (double )n/70 * 100);
-            snprintf(forth, sizeof(forth), back);
-        }
+    for ( FILE * in; ; sleep(6) ) {
+        wr = 0; len = 75;
 
-        // Volume Monitor //
-        if ( (in = popen("ponymix get-volume", "r")) )
-        {   n = 0;
-			fscanf(in, "%d", &n); pclose(in);
-            int isMuted = system("ponymix is-muted");
-            snprintf(back, sizeof(back), "%s | A: %d%s", forth, n, ( isMuted ? "" : "M"));
-            snprintf(forth, sizeof(forth), back);
-        }
+        if ( (in = fopen("/sys/class/net/" EFACE "/operstate", "r")) ) {
+            fscanf(in, "%c", &stat); fclose(in);
+            wr += snprintf(line + wr, len, "E: %c | ", stat == 'u' ? 'U' : 'D');
+        } len -= (uint32_t )wr;
 
-        // Battery Monitor //
-        if ( (in = fopen(battNow, "r")) )
-        {   fscanf(in, "%d", &n); fclose(in);
-            snprintf(forth, sizeof(forth), "%s | B: %d", back, n);
-            if ( (in = fopen(battStat, "r")) )
-            {   fscanf(in, "%c", &stat);
-                fclose(in);
+        if ( (in = fopen("/proc/net/wireless", "r")) ) {
+            fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %d.", &n); fclose(in);
+            wr += snprintf(line + wr, len, "W: %.3g | ", (double )n / 70 * 100);
+        } len -= (uint32_t )wr;
+
+        if ( (in = popen("ponymix get-volume", "r")) ) {
+            fscanf(in, "%d", &n); pclose(in);
+            bool mute_status = system("ponymix is-muted");
+            wr += snprintf(line + wr, len, "A: %d%c | ", n, mute_status ? '%' : 'M');
+        } len -= (uint32_t )wr;
+
+        if ( (in = fopen("/sys/class/power_supply/" BAT "/capacity", "r")) ) {
+            fscanf(in, "%d", &n); fclose(in);
+            wr += snprintf(line + wr, len, "B: %d", n);
+            len -= (uint32_t )wr;
+
+
+            if ( (in = fopen("/sys/class/power_supply/" BAT "/status", "r")) ) {
+                fscanf(in, "%c", &stat); fclose(in);
             }
-            snprintf(back, sizeof(back), "%s%s", forth, ( stat == 'C' ? "C" : "" ));
-            snprintf(forth, sizeof(forth), back);
-        }
+
+            wr += snprintf(line + wr, len, "%c | ", stat == 'C' ? 'C' : 'D');
+        } len -= (uint32_t )wr;
 
         // Clock //
         time(&current);
-        strftime(clck, 37, "%H.%M | %A, %d %B %Y", localtime(&current));
-        snprintf(back, sizeof(back), "%s | %s", forth, clck);
-		XStoreName(display, DefaultRootWindow(display), statusOut);
-		XSync(display, False);
-    }
-    XCloseDisplay(display);
-    return 0;
+        wr += strftime(line + wr, len, "%H.%M | %A, %d %B %Y", localtime(&current));
+        XStoreName(display, DefaultRootWindow(display), line);
+        XSync(display, False);
+    } XCloseDisplay(display); return 0;
 }
 
 // vim:set ts=4 sw=4 et:
