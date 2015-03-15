@@ -24,10 +24,6 @@ static int n;
 static time_t current;
 static Display * display;
 
-// Prototypes //
-void _usage (void);
-void _setStatus (char * statusOut);
-
 // Main Function //
 int main (int argc, char ** argv)
 {   if ( argc > 1 ) _usage();
@@ -78,21 +74,11 @@ int main (int argc, char ** argv)
         time(&current);
         strftime(clck, 37, "%H.%M | %A, %d %B %Y", localtime(&current));
         snprintf(back, sizeof(back), "%s | %s", forth, clck);
-        _setStatus(back);
+		XStoreName(display, DefaultRootWindow(display), statusOut);
+		XSync(display, False);
     }
     XCloseDisplay(display);
     return 0;
 }
 
-// Usage //
-void _usage (void)
-{   fprintf(stderr, "Usage: dstat [-h|--help]\n");
-    exit(0);
-}
-
-// Set Status //
-void _setStatus (char * statusOut)
-{   XStoreName(display, DefaultRootWindow(display), statusOut);
-    XSync(display, False);
-}
 // vim:set ts=4 sw=4 et:
