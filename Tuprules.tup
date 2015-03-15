@@ -1,0 +1,3 @@
+CFLAGS += -D_XOPEN_SOURCE -g -fstack-protector-all -std=c11 -Weverything
+LDFLAGS += -lX11 -Wl,-z,relro,-z,now
+CC = clang
