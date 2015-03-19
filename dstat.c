@@ -29,7 +29,7 @@ main (void) {
 
     int32_t wr, n = 0;
     uint32_t len = 75;
-    char stat = 0, line [len];
+    char stat = 0, line [len + 1];
     time_t current;
 
     for ( FILE * in; ; sleep(6) ) {
