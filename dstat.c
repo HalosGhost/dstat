@@ -21,10 +21,6 @@
 int32_t
 main (void) {
 
-    const char * wifi_levels [4] = {
-        "⡀", "⡀⡄", "⡀⡄⡆", "⡀⡄⡆⡇"
-    };
-
     Display * display;
     if ( !(display = XOpenDisplay(NULL)) ) {
         fputs("Could not open display\n", stderr);
@@ -45,6 +41,9 @@ main (void) {
         }
 
         if ( (in = fopen("/proc/net/wireless", "r")) ) {
+
+            const char * wifi_levels [4] = { "⡀", "⡀⡄", "⡀⡄⡆", "⡀⡄⡆⡇" };
+
             fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %d.", &n); fclose(in);
             l -= snprintf(line + (75 - l), (uint32_t )l, "%s | ",
                           wifi_levels[n / 17]);
