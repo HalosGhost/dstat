@@ -42,7 +42,7 @@ main (void) {
 
         if ( (in = fopen("/proc/net/wireless", "r")) ) {
 
-            const char * wifi_levels [4] = { "⡀", "⡀⡄", "⡀⡄⡆", "⡀⡄⡆⡇" };
+            const char * wifi_levels [4] = { "⡀   ", "⡀⡄  ", "⡀⡄⡆ ", "⡀⡄⡆⡇" };
 
             fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %d.", &n); fclose(in);
             l -= snprintf(line + (75 - l), (uint32_t )l, "%s | ",
@@ -62,8 +62,8 @@ main (void) {
 
             if ( (in = fopen("/sys/class/power_supply/" BAT "/status", "r")) ) {
                 fscanf(in, "%c", &stat); fclose(in);
-                l -= snprintf(line + (75 - l), (uint32_t )l, "%c | ",
-                              stat == 'C' ? 'C' : 'D');
+                l -= snprintf(line + (75 - l), (uint32_t )l, "%s | ",
+                              stat == 'C' ? "ϟ" : "D");
             }
         }
 
