@@ -21,6 +21,10 @@
 int32_t
 main (void) {
 
+    const char * wifi_levels [4] = {
+        "⡀", "⡀⡄", "⡀⡄⡆", "⡀⡄⡆⡇"
+    };
+
     Display * display;
     if ( !(display = XOpenDisplay(NULL)) ) {
         fputs("Could not open display\n", stderr);
@@ -42,8 +46,8 @@ main (void) {
 
         if ( (in = fopen("/proc/net/wireless", "r")) ) {
             fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %d.", &n); fclose(in);
-            l -= snprintf(line + (75 - l), (uint32_t )l, "W: %.3g | ",
-                          (double )n / 70 * 100);
+            l -= snprintf(line + (75 - l), (uint32_t )l, "%s | ",
+                          wifi_levels[n / 17]);
         }
 
         if ( (in = popen("ponymix get-volume", "r")) ) {
