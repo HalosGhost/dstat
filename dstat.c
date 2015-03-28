@@ -41,9 +41,7 @@ main (void) {
         }
 
         if ( (in = fopen("/proc/net/wireless", "r")) ) {
-
-            const char * wifi_levels [4] = { "⡀   ", "⡀⡄  ", "⡀⡄⡆ ", "⡀⡄⡆⡇" };
-
+            const char wifi_levels [4][13] = { "⡀   ", "⡀⡄  ", "⡀⡄⡆ ", "⡀⡄⡆⡇" };
             fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %d.", &n); fclose(in);
             l -= snprintf(line + (80 - l), (uint32_t )l, "%s | ",
                           wifi_levels[n / 17]);
@@ -51,9 +49,8 @@ main (void) {
 
         if ( (in = popen("ponymix get-volume", "r")) ) {
             fscanf(in, "%d", &n); pclose(in);
-            bool mute_status = system("ponymix is-muted");
             l -= snprintf(line + (80 - l), (uint32_t )l, "A: %d%c | ", n,
-                          mute_status ? '%' : 'M');
+                          system("ponymix is-muted") ? '%' : 'M');
         }
 
         if ( (in = fopen("/sys/class/power_supply/" BAT "/capacity", "r")) ) {
