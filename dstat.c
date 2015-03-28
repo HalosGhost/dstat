@@ -28,45 +28,45 @@ main (void) {
     }
 
     int32_t n = 0, l;
-    char stat, line [81];
+    char stat, line [80];
     time_t current;
 
     for ( FILE * in; ; sleep(6) ) {
-        l = 80;
+        l = 79;
 
         if ( (in = fopen("/sys/class/net/" EFACE "/operstate", "r")) ) {
             fscanf(in, "%c", &stat); fclose(in);
-            l -= snprintf(line + (80 - l), (uint32_t )l, "E: %c | ",
+            l -= snprintf(line + (79 - l), (uint32_t )l, "E: %c | ",
                           stat == 'u' ? 'U' : 'D');
         }
 
         if ( (in = fopen("/proc/net/wireless", "r")) ) {
             const char wifi_levels [4][13] = { "⡀   ", "⡀⡄  ", "⡀⡄⡆ ", "⡀⡄⡆⡇" };
             fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %d.", &n); fclose(in);
-            l -= snprintf(line + (80 - l), (uint32_t )l, "%s | ",
-                          wifi_levels[n / 17]);
+            l -= snprintf(line + (79 - l), (uint32_t )l, "%s | ",
+                          wifi_levels[n / 18]);
         }
 
         if ( (in = popen("ponymix get-volume", "r")) ) {
             fscanf(in, "%d", &n); pclose(in);
-            l -= snprintf(line + (80 - l), (uint32_t )l, "A: %d%c | ", n,
+            l -= snprintf(line + (79 - l), (uint32_t )l, "A: %d%c | ", n,
                           system("ponymix is-muted") ? '%' : 'M');
         }
 
         if ( (in = fopen("/sys/class/power_supply/" BAT "/capacity", "r")) ) {
             fscanf(in, "%d", &n); fclose(in);
-            l -= snprintf(line + (80 - l), (uint32_t )l, "B: %d", n);
+            l -= snprintf(line + (79 - l), (uint32_t )l, "B: %d", n);
 
             if ( (in = fopen("/sys/class/power_supply/" BAT "/status", "r")) ) {
                 fscanf(in, "%c", &stat); fclose(in);
-                l -= snprintf(line + (80 - l), (uint32_t )l, "%s | ",
+                l -= snprintf(line + (79 - l), (uint32_t )l, "%s | ",
                               stat == 'C' ? "ϟ" : "D");
             }
         }
 
         // Clock //
         time(&current);
-        l -= strftime(line + (80 - l), (uint32_t )l, "%H.%M | %A, %d %B %Y",
+        l -= strftime(line + (79 - l), (uint32_t )l, "%H.%M | %A, %d %B %Y",
                       localtime(&current));
 
         XStoreName(display, DefaultRootWindow(display), line);
