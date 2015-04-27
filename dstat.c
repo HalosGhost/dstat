@@ -7,7 +7,7 @@
 #include <stdio.h>    // fputs(), fopen(), fscanf(), fclose(), popen(), pclose()
 #include <unistd.h>   // sleep()
 #include <stdbool.h>  // bool
-#include <stdlib.h>   // system()
+#include <stdlib.h>   // system(), EXIT_FAILURE, EXIT_SUCCESS
 #include <time.h>     // time_t, time(), strftime(), localtime()
 #include <X11/Xlib.h> // Display, XOpenDisplay(), XStoreName(),
                       // DefaultRootWindow(), XSync(), XCloseDisplay()
@@ -18,13 +18,13 @@
 #define BAT   "BAT0"
 
 // Main Function //
-int32_t
+signed
 main (void) {
 
     Display * display;
     if ( !(display = XOpenDisplay(NULL)) ) {
         fputs("Could not open display\n", stderr);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int32_t n = 0, l;
@@ -71,7 +71,7 @@ main (void) {
 
         XStoreName(display, DefaultRootWindow(display), line);
         XSync(display, False);
-    } XCloseDisplay(display); return 0;
+    } XCloseDisplay(display); return EXIT_SUCCESS;
 }
 
 // vim:set ts=4 sw=4 et:
