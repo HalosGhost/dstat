@@ -1,3 +1,0 @@
-include_rules
-
-: dstat.c |> $(CC) $(CFLAGS) $(LDFLAGS) %f -o %o |> dstat
