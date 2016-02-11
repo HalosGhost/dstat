@@ -20,10 +20,10 @@
 #define EPATH "/sys/class/net/" EFACE "/operstate"
 #define WFACE "wl0"
 #define WPATH "/proc/net/wireless"
+#define PASNK 0
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define PASNK "Sink 0"
 #define LNFMT "E: %s | W: %s | A: %" PRIu16 "%s | B: %" PRIu8 "%s | %s"
 
 #define EN_INTERVAL 60
