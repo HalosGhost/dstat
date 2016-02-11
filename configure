@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+usage () {
+    printf "Usage: ./configure.sh [options]\n\n"
+    printf "Options:\n"
+    printf "  --en-iface='ID'    Monitor LAN device named 'ID' (default: en0)\n"
+    printf "  --en-ival='#'      Update LAN status every # seconds (default: 60)\n"
+    printf "  --wl-iface='ID'    Monitor WLAN device named 'ID' (default: wl0)\n"
+    printf "  --wl-ival='#'      Update WLAN status every # seconds (default: 30)\n"
+    printf "  --pa-sink='#'      Monitor Pulse sink numbered # (default: 0)\n"
+    printf "  --pa-ival='#'      Update sink status every # seconds (default: 30)\n"
+    printf "  --bat-dev='ID'     Monitor battery device named 'ID' (default: BAT0)\n"
+    printf "  --bat-ival='#'     Update battery status every # seconds (default: 30)\n"
+    printf "  --tm-fmt='FMT'     Format the clock using 'FMT' (default: '%%H.%%M (%%Z) | %%A, %%d %%B %%Y')\n"
+    printf "  --tm-ival='#'      Update clock every # seconds (default: 15)\n"
+    printf "  --pt-ival='#'      Repaint the bar every # seconds (default: 15)\n"
+    printf "  --reset-config     Reset configuration to the defaults\n"
+}
+
+update () {
+    sed -i ./src/dstat.h -re "s/(define $1) \"(.*)\"$/\\1 \"$2\"/"
+}
+
+update_num () {
+    sed -i ./src/dstat.h -re "s/(define $1) (.*)$/\\1 $2/"
+}
+
+default_config () {
+    update     EFACE       en0
+    update_num EN_INTERVAL 60
+    update     WFACE       wl0
+    update_num WL_INTERVAL 30
+    update_num PASNK       0
+    update_num VL_INTERVAL 30
+    update     BATDV       BAT0
+    update_num BT_INTERVAL 30
+    update     TMFMT       '%H.%M (%Z) | %A, %d %B %Y'
+    update_num TM_INTERVAL 15
+    update_num PT_INTERVAL 15
+}
+
+if [[ -n "$1" ]]; then
+    default_config
+    exit 0
+fi
+
+for i in "$@"; do
+    case "$i" in
+        --help)         usage; exit 0;;
+        --en-iface=*)   update     EFACE       "${i#*=}"; shift;;
+        --en-ival=*)    update_num EN_INTERVAL "${i#*=}"; shift;;
+        --wl-iface=*)   update     WFACE       "${i#*=}"; shift;;
+        --wl-ival=*)    update_num WL_INTERVAL "${i#*=}"; shift;;
+        --pa-sink=*)    update_num PASNK       "${i#*=}"; shift;;
+        --pa-ival=*)    update_num VL_INTERVAL "${i#*=}"; shift;;
+        --bat-dev=*)    update     BATDV       "${i#*=}"; shift;;
+        --bat-ival=*)   update_num BT_INTERVAL "${i#*=}"; shift;;
+        --tm-fmt=*)     update     TMFMT       "${i#*=}"; shift;;
+        --tm-ival=*)    update_num TM_INTERVAL "${i#*=}"; shift;;
+        --pt-ival=*)    update_num PT_INTERVAL "${i#*=}"; shift;;
+        --reset-config) default_config; exit 0;;
+    esac
+done
