@@ -39,8 +39,27 @@ default_config () {
     update_num PT_INTERVAL 15
 }
 
-if [[ -n "$1" ]]; then
+show_value () {
+    printf "$1: %s\n" "$('grep' "#define $2" ./src/dstat.h | sed -re "s/#define $2 (.*)$/\\1/")"
+}
+
+show_config () {
+    show_value 'Wired Interface' EFACE
+    show_value 'LAN Interface Update Interval' EN_INTERVAL
+    show_value 'Wireless Interface' WFACE
+    show_value 'WLAN Interface Update Interval' WL_INTERVAL
+    show_value 'PulseAudio Sink' PASNK
+    show_value 'PulseAudio Update Interval' VL_INTERVAL
+    show_value 'Battery Device' BATDV
+    show_value 'Battery Update Interval' BT_INTERVAL
+    show_value 'Clock Format String' TMFMT
+    show_value 'Clock Update Interval' TM_INTERVAL
+    show_value 'Bar Repaint Interval' PT_INTERVAL
+}
+
+if [[ $# == 0 ]]; then
     default_config
+    show_config
     exit 0
 fi
 
@@ -61,3 +80,5 @@ for i in "$@"; do
         --reset-config) default_config; exit 0;;
     esac
 done
+
+show_config
