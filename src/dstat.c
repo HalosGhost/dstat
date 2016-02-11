@@ -51,7 +51,7 @@ get_wl_strength (uint8_t * strength) {
     if ( fscanf(in, "%*[^\n]\n%*[^\n]\n" WFACE ": %*d %" SCNu8 ".", &n) != 1 ) {
         errsv = errno;
         syslog(LOG_ERR, FAIL_READ(WPATH) ": %s\n", strerror(errsv));
-        return EXIT_FAILURE;
+        n = 0;
     } fclose(in);
 
     *strength = !n ? n : (n / 10) + 1;
