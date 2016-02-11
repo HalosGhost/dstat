@@ -173,47 +173,13 @@ main (void) {
     char status_line [102]   = "";
 
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
-        if ( !(c_time % EN_INTERVAL) ) {
-            if ( (status = get_en_state(en_state)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
-
-        if ( !(c_time % WL_INTERVAL) ) {
-            if ( (status = get_wl_strength(wl_strength)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
-
-        if ( !(c_time % VL_INTERVAL) ) {
-            if ( (status = get_aud_volume(audio_vol)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
-
-        if ( !(c_time % VL_INTERVAL) ) {
-            if ( (status = get_aud_mute(audio_mut)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
-
-        if ( !(c_time % BT_INTERVAL) ) {
-            if ( (status = get_bat_cap(bat_capacity)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
-
-        if ( !(c_time % BT_INTERVAL) ) {
-            if ( (status = get_bat_state(bat_state)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
-
-        if ( !(c_time % TM_INTERVAL) ) {
-            if ( (status = get_time_state(time_state)) != EXIT_SUCCESS ) {
-                goto cleanup;
-            }
-        }
+        UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
+        UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
+        UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
+        UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
+        UPDATE_MODULE_AT(get_bat_cap(bat_capacity), BT_INTERVAL);
+        UPDATE_MODULE_AT(get_bat_state(bat_state), BT_INTERVAL);
+        UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
 
         if ( !(c_time % PT_INTERVAL) ) {
             snprintf(status_line, 99, LNFMT,

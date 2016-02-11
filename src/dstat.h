@@ -14,6 +14,14 @@
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
+#define UPDATE_MODULE_AT(mod,ival) \
+    do { \
+        if ( !(c_time % (ival)) ) { \
+            if ( (status = (mod)) != EXIT_SUCCESS ) { \
+                goto cleanup; \
+            } \
+        } \
+    } while ( false )
 
 /* Personal Configuration */
 #define EFACE "en0"
