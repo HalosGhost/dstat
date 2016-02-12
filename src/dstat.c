@@ -1,5 +1,60 @@
 #include "dstat.h"
 
+signed
+main (void) {
+
+    signed status = EXIT_SUCCESS;
+    openlog(NULL, LOG_CONS, LOG_USER);
+    syslog(LOG_INFO, "Starting\n");
+
+    dpy = XOpenDisplay(NULL);
+    if ( !dpy ) {
+        syslog(LOG_ERR, "Could not open display\n");
+        return EXIT_FAILURE;
+    }
+
+    signal(2, signal_handler);
+    signal(3, signal_handler);
+    signal(15, signal_handler);
+
+    char en_state [2]        = "D";
+    uint8_t wl_strength [1]  = { 0 };
+    uint16_t audio_vol [1]   = { 0 };
+    char audio_mut [2]       = "%";
+    uint8_t bat_capacity [1] = { 0 };
+    char bat_state [3]       = "D";
+    char time_state [44]     = "00.00 (GMT) | Thursday, 01 January";
+    char status_line [102]   = "";
+
+    for ( time_t c_time = 0; ; c_time = time(NULL) ) {
+        UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
+        UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
+        UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
+        UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
+        UPDATE_MODULE_AT(get_bat_cap(bat_capacity), BT_INTERVAL);
+        UPDATE_MODULE_AT(get_bat_state(bat_state), BT_INTERVAL);
+        UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
+
+        if ( !(c_time % PT_INTERVAL) ) {
+            snprintf(status_line, 99, LNFMT,
+                    en_state,
+                    wl_bars[*wl_strength],
+                    *audio_vol, audio_mut,
+                    *bat_capacity, bat_state,
+                    time_state);
+
+            XStoreName(dpy, DefaultRootWindow(dpy), status_line);
+            XSync(dpy, False);
+        } sleep(1);
+    }
+
+    cleanup:
+        syslog(LOG_INFO, "Terminating\n");
+        XCloseDisplay(dpy);
+        closelog();
+        return status;
+}
+
 void
 signal_handler (signed signum) {
 
@@ -160,61 +215,6 @@ get_time_state (char * state) {
         syslog(LOG_ERR, "strftime() returned 0\n");
         return EXIT_FAILURE;
     } return EXIT_SUCCESS;
-}
-
-signed
-main (void) {
-
-    signed status = EXIT_SUCCESS;
-    openlog(NULL, LOG_CONS, LOG_USER);
-    syslog(LOG_INFO, "Starting\n");
-
-    dpy = XOpenDisplay(NULL);
-    if ( !dpy ) {
-        syslog(LOG_ERR, "Could not open display\n");
-        return EXIT_FAILURE;
-    }
-
-    signal(2, signal_handler);
-    signal(3, signal_handler);
-    signal(15, signal_handler);
-
-    char en_state [2]        = "D";
-    uint8_t wl_strength [1]  = { 0 };
-    uint16_t audio_vol [1]   = { 0 };
-    char audio_mut [2]       = "%";
-    uint8_t bat_capacity [1] = { 0 };
-    char bat_state [3]       = "D";
-    char time_state [44]     = "00.00 (GMT) | Thursday, 01 January";
-    char status_line [102]   = "";
-
-    for ( time_t c_time = 0; ; c_time = time(NULL) ) {
-        UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
-        UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
-        UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
-        UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
-        UPDATE_MODULE_AT(get_bat_cap(bat_capacity), BT_INTERVAL);
-        UPDATE_MODULE_AT(get_bat_state(bat_state), BT_INTERVAL);
-        UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
-
-        if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, 99, LNFMT,
-                    en_state,
-                    wl_bars[*wl_strength],
-                    *audio_vol, audio_mut,
-                    *bat_capacity, bat_state,
-                    time_state);
-
-            XStoreName(dpy, DefaultRootWindow(dpy), status_line);
-            XSync(dpy, False);
-        } sleep(1);
-    }
-
-    cleanup:
-        syslog(LOG_INFO, "Terminating\n");
-        XCloseDisplay(dpy);
-        closelog();
-        return status;
 }
 
 // vim: set ts=4 sw=4 et:
