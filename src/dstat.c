@@ -1,5 +1,14 @@
 #include "dstat.h"
 
+void
+signal_handler (signed signum) {
+
+    syslog(LOG_INFO, "Caught %d; Terminating\n", signum);
+    XCloseDisplay(dpy);
+    closelog();
+    exit(EXIT_SUCCESS);
+}
+
 signed
 get_en_state (char * state) {
 
@@ -160,11 +169,15 @@ main (void) {
     openlog(NULL, LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Starting\n");
 
-    Display * dpy = XOpenDisplay(NULL);
+    dpy = XOpenDisplay(NULL);
     if ( !dpy ) {
         syslog(LOG_ERR, "Could not open display\n");
         return EXIT_FAILURE;
     }
+
+    signal(2, signal_handler);
+    signal(3, signal_handler);
+    signal(15, signal_handler);
 
     char en_state [2]        = "D";
     uint8_t wl_strength [1]  = { 0 };

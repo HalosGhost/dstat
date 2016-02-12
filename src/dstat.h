@@ -11,6 +11,7 @@
 #include <time.h>
 #include <X11/Xlib.h>
 #include <syslog.h>
+#include <signal.h>
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
@@ -44,6 +45,11 @@
 static const char wl_bars [][22] = {
 	"No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"
 };
+
+static Display * dpy;
+
+_Noreturn void
+signal_handler (signed);
 
 signed
 get_en_state (char *);
