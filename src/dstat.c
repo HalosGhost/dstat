@@ -3,7 +3,7 @@
 void
 signal_handler (signed signum) {
 
-    syslog(LOG_INFO, "Caught %d; Terminating\n", signum);
+    syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
     XCloseDisplay(dpy);
     closelog();
     exit(EXIT_SUCCESS);

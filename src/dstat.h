@@ -47,6 +47,7 @@ static const char wl_bars [][22] = {
 };
 
 static Display * dpy;
+extern const char * const sys_siglist [];
 
 _Noreturn void
 signal_handler (signed);
