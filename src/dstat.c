@@ -22,6 +22,7 @@ get_en_state (char * state) {
     if ( fscanf(in, "%c", &st) != 1 ) {
         errsv = errno;
         syslog(LOG_ERR, FAIL_READ(EPATH) ": %s\n", strerror(errsv));
+        fclose(in);
         return EXIT_FAILURE;
     } fclose(in);
 
@@ -101,6 +102,7 @@ get_bat_cap (uint8_t * capacity) {
     if ( fscanf(in, "%" SCNu8, capacity) != 1 ) {
         errsv = errno;
         syslog(LOG_ERR, FAIL_READ(BPATH) "/capacity: %s\n", strerror(errsv));
+        fclose(in);
         return EXIT_FAILURE;
     } fclose(in); return EXIT_SUCCESS;
 }
@@ -127,6 +129,7 @@ get_bat_state (char * state) {
     if ( fscanf(in, "%c", &st) != 1 ) {
         errsv = errno;
         syslog(LOG_ERR, FAIL_READ(BPATH) "/status: %s\n", strerror(errsv));
+        fclose(in);
         return EXIT_FAILURE;
     } fclose(in);
 
