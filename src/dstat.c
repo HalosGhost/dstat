@@ -56,6 +56,15 @@ main (void) {
 }
 
 void
+check_null_arg (void * ptr, const char * caller) {
+
+    if ( !ptr )  {
+        syslog(LOG_ERR, "%s was passed a NULL pointer\n", caller);
+        exit(EXIT_FAILURE);
+    }
+}
+
+void
 signal_handler (signed signum) {
 
     syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
@@ -67,10 +76,7 @@ signal_handler (signed signum) {
 signed
 get_en_state (char * state) {
 
-    if ( !state ) {
-        syslog(LOG_ERR, "get_en_state() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(state, "get_en_state()");
 
     signed errsv = 0;
     errno = 0;
@@ -97,10 +103,7 @@ get_en_state (char * state) {
 signed
 get_wl_strength (uint8_t * strength) {
 
-    if ( !strength ) {
-        syslog(LOG_ERR, "get_wl_strength() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(strength, "get_wl_strength()");
 
     signed errsv = 0;
     errno = 0;
@@ -126,10 +129,7 @@ get_wl_strength (uint8_t * strength) {
 signed
 get_aud_volume (uint16_t * volume) {
 
-    if ( !volume ) {
-        syslog(LOG_ERR, "get_aud_volume() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(volume, "get_aud_volume()");
 
     return EXIT_SUCCESS;
 }
@@ -137,10 +137,7 @@ get_aud_volume (uint16_t * volume) {
 signed
 get_aud_mute (char * mute) {
 
-    if ( !mute ) {
-        syslog(LOG_ERR, "get_aud_mute() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(mute, "get_aud_mute()");
 
     return EXIT_SUCCESS;
 }
@@ -148,10 +145,7 @@ get_aud_mute (char * mute) {
 signed
 get_bat_cap (uint8_t * capacity) {
 
-    if ( !capacity ) {
-        syslog(LOG_ERR, "get_bat_cap() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(capacity, "get_bat_cap()");
 
     signed errsv = 0;
     errno = 0;
@@ -174,10 +168,7 @@ get_bat_cap (uint8_t * capacity) {
 signed
 get_bat_state (char * state) {
 
-    if ( !state ) {
-        syslog(LOG_ERR, "get_bat_state() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(state, "get_bat_state()");
 
     signed errsv = 0;
     errno = 0;
@@ -204,10 +195,7 @@ get_bat_state (char * state) {
 signed
 get_time_state (char * state) {
 
-    if ( !state ) {
-        syslog(LOG_ERR, "get_time_state() was passed a NULL pointer\n");
-        return EXIT_FAILURE;
-    }
+    check_null_arg(state, "get_time_state()");
 
     time_t current;
     time(&current);
