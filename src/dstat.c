@@ -1,5 +1,14 @@
 #include "dstat.h"
 
+#define UPDATE_MODULE_AT(mod,ival) \
+    do { \
+        if ( !(c_time % (ival)) ) { \
+            if ( (status = (mod)) != EXIT_SUCCESS ) { \
+                goto cleanup; \
+            } \
+        } \
+    } while ( false )
+
 signed
 main (void) {
 
