@@ -36,7 +36,7 @@ main (void) {
         UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
 
         if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, 99, LNFMT,
+            snprintf(status_line, 102, LNFMT,
                     en_state,
                     wl_bars[*wl_strength],
                     *audio_vol, audio_mut,
