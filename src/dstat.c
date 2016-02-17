@@ -65,15 +65,6 @@ main (void) {
 }
 
 void
-check_null_arg (void * ptr, const char * caller) {
-
-    if ( !ptr )  {
-        syslog(LOG_ERR, "%s was passed a NULL pointer\n", caller);
-        exit(EXIT_FAILURE);
-    }
-}
-
-void
 signal_handler (signed signum) {
 
     syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
@@ -82,10 +73,18 @@ signal_handler (signed signum) {
     exit(EXIT_SUCCESS);
 }
 
+#define check_null_arg(ptr) \
+    do { \
+        if ( !(ptr) ) { \
+            syslog(LOG_ERR, "%s() was passed a NULL pointer\n", __func__); \
+            exit(EXIT_FAILURE); \
+        } \
+    } while ( false )
+
 signed
 get_en_state (char * state) {
 
-    check_null_arg(state, "get_en_state()");
+    check_null_arg(state);
 
     signed errsv = 0;
     errno = 0;
@@ -112,7 +111,7 @@ get_en_state (char * state) {
 signed
 get_wl_strength (uint8_t * strength) {
 
-    check_null_arg(strength, "get_wl_strength()");
+    check_null_arg(strength);
 
     signed errsv = 0;
     errno = 0;
@@ -138,23 +137,21 @@ get_wl_strength (uint8_t * strength) {
 signed
 get_aud_volume (uint16_t * volume) {
 
-    check_null_arg(volume, "get_aud_volume()");
-
+    check_null_arg(volume);
     return EXIT_SUCCESS;
 }
 
 signed
 get_aud_mute (char * mute) {
 
-    check_null_arg(mute, "get_aud_mute()");
-
+    check_null_arg(mute);
     return EXIT_SUCCESS;
 }
 
 signed
 get_bat_cap (uint8_t * capacity) {
 
-    check_null_arg(capacity, "get_bat_cap()");
+    check_null_arg(capacity);
 
     signed errsv = 0;
     errno = 0;
@@ -177,7 +174,7 @@ get_bat_cap (uint8_t * capacity) {
 signed
 get_bat_state (char * state) {
 
-    check_null_arg(state, "get_bat_state()");
+    check_null_arg(state);
 
     signed errsv = 0;
     errno = 0;
@@ -204,7 +201,7 @@ get_bat_state (char * state) {
 signed
 get_time_state (char * state) {
 
-    check_null_arg(state, "get_time_state()");
+    check_null_arg(state);
 
     time_t current;
     time(&current);
