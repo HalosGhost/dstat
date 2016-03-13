@@ -130,7 +130,7 @@ get_wl_strength (uint8_t * strength) {
         n = 0;
     } fclose(in);
 
-    *strength = !n ? n : (n / 10) + 1;
+    *strength = !n ? n : (n / 10) + (n < 7);
     return EXIT_SUCCESS;
 }
 
