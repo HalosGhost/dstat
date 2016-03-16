@@ -10,17 +10,11 @@
     } while ( false )
 
 signed
-main (void) {
+main (signed argc, char * argv []) {
 
     signed status = EXIT_SUCCESS;
     openlog(NULL, LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Starting\n");
-
-    dpy = XOpenDisplay(NULL);
-    if ( !dpy ) {
-        syslog(LOG_ERR, "Could not open display\n");
-        return EXIT_FAILURE;
-    }
 
     signal(2, signal_handler);
     signal(3, signal_handler);
@@ -33,7 +27,25 @@ main (void) {
     uint8_t bat_capacity [1] = { 0 };
     char bat_state [3]       = "D";
     char time_state [44]     = "00.00 (GMT) | Thursday, 01 January";
-    char status_line [102]   = "";
+    bool stdout_flag         = false;
+    char status_line [103]   = "";
+
+    const char * vos = "hs";
+    for ( signed oi = 0, c = getopt_long(argc, argv, vos, os, &oi);
+          c != -1; c = getopt_long(argc, argv, vos, os, &oi) ) {
+        switch ( c ) {
+            case 'h': puts(usage_str); goto cleanup;
+            case 's': stdout_flag = true; break;
+        }
+    }
+
+    if ( !stdout_flag ) {
+        dpy = XOpenDisplay(NULL);
+        if ( !dpy ) {
+            syslog(LOG_ERR, "Could not open display\n");
+            return EXIT_FAILURE;
+        }
+    }
 
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
         UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
@@ -45,21 +57,26 @@ main (void) {
         UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
 
         if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, 102, LNFMT,
+            snprintf(status_line, 103, LNFMT,
                     en_state,
                     wl_bars[*wl_strength],
                     *audio_vol, audio_mut,
                     *bat_capacity, bat_state,
-                    time_state);
+                    time_state, STCHR);
 
-            XStoreName(dpy, DefaultRootWindow(dpy), status_line);
-            XSync(dpy, False);
+            if ( dpy ) {
+                XStoreName(dpy, DefaultRootWindow(dpy), status_line);
+                XSync(dpy, False);
+            } else {
+                fputs(status_line, stdout);
+                fflush(stdout);
+            }
         } sleep(1);
     }
 
     cleanup:
         syslog(LOG_INFO, "Terminating\n");
-        XCloseDisplay(dpy);
+        if ( dpy ) { XCloseDisplay(dpy); }
         closelog();
         return status;
 }
@@ -68,7 +85,7 @@ void
 signal_handler (signed signum) {
 
     syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
-    XCloseDisplay(dpy);
+    if ( dpy ) { XCloseDisplay(dpy); }
     closelog();
     exit(EXIT_SUCCESS);
 }

@@ -12,6 +12,7 @@
 #include <X11/Xlib.h>
 #include <syslog.h>
 #include <signal.h>
+#include <getopt.h>
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
@@ -25,7 +26,8 @@
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define LNFMT "E: %s | W: %s | A: %" PRIu16 "%s | B: %" PRIu8 "%s | %s"
+#define LNFMT "E: %s | W: %s | A: %" PRIu16 "%s | B: %" PRIu8 "%s | %s%c"
+#define STCHR '\n'
 
 #define EN_INTERVAL 60
 #define WL_INTERVAL 30
@@ -37,6 +39,19 @@
 static const char wl_bars [][22] = {
 	"No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"
 };
+
+static struct option os [] = {
+    { "help",   0, 0, 'h' },
+    { "stdout", 0, 0, 's' },
+    { 0,        0, 0, 0   }
+};
+
+static const char usage_str [] =
+    "Usage: dstat [option ...]\n"
+    "pbpst -- a simple dwm/stdout status program\n\n"
+    "Options:\n"
+    "  -h, --help      Print this help and exit\n"
+    "  -s, --stdout    Output to stdout";
 
 static Display * dpy;
 extern const char * const sys_siglist [];
