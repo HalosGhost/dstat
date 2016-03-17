@@ -28,7 +28,7 @@ main (signed argc, char * argv []) {
     char bat_state [3]       = "D";
     char time_state [44]     = "00.00 (GMT) | Thursday, 01 January";
     bool stdout_flag         = false;
-    char status_line [103]   = "";
+    char status_line [104]   = "";
 
     const char * vos = "hs";
     for ( signed oi = 0, c = getopt_long(argc, argv, vos, os, &oi);
@@ -45,6 +45,8 @@ main (signed argc, char * argv []) {
             syslog(LOG_ERR, "Could not open display\n");
             return EXIT_FAILURE;
         }
+    } else {
+        printf("\x1b[?25l");
     }
 
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
@@ -57,7 +59,7 @@ main (signed argc, char * argv []) {
         UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
 
         if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, 103, LNFMT,
+            snprintf(status_line, 104, LNFMT,
                     en_state,
                     wl_bars[*wl_strength],
                     *audio_vol, audio_mut,
@@ -76,7 +78,12 @@ main (signed argc, char * argv []) {
 
     cleanup:
         syslog(LOG_INFO, "Terminating\n");
-        if ( dpy ) { XCloseDisplay(dpy); }
+        if ( dpy ) {
+            XCloseDisplay(dpy);
+        } else {
+            printf("\x1b[?25h");
+        }
+
         closelog();
         return status;
 }
@@ -85,7 +92,12 @@ void
 signal_handler (signed signum) {
 
     syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
-    if ( dpy ) { XCloseDisplay(dpy); }
+    if ( dpy ) {
+        XCloseDisplay(dpy);
+    } else {
+        printf("\x1b[?25h");
+    }
+
     closelog();
     exit(EXIT_SUCCESS);
 }

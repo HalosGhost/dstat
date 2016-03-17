@@ -26,8 +26,8 @@
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define LNFMT "E: %s | W: %s | A: %" PRIu16 "%s | B: %" PRIu8 "%s | %s%c"
-#define STCHR '\n'
+#define LNFMT "E: %s | W: %s | A: %" PRIu16 "%s | B: %" PRIu8 "%s | %s%s"
+#define STCHR "\n"
 
 #define EN_INTERVAL 60
 #define WL_INTERVAL 30
