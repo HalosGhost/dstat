@@ -48,7 +48,7 @@ static struct option os [] = {
 
 static const char usage_str [] =
     "Usage: dstat [option ...]\n"
-    "pbpst -- a simple dwm/stdout status program\n\n"
+    "dstat -- a simple dwm/stdout status program\n\n"
     "Options:\n"
     "  -h, --help      Print this help and exit\n"
     "  -s, --stdout    Output to stdout";
