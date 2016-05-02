@@ -13,6 +13,7 @@
 #include <syslog.h>
 #include <signal.h>
 #include <getopt.h>
+#include <pulse/pulseaudio.h>
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
@@ -54,10 +55,20 @@ static const char usage_str [] =
     "  -s, --stdout    Output to stdout";
 
 static Display * dpy;
+static uint32_t cvol;
+static signed is_muted, pa_stat;
+static pa_mainloop * mainloop;
+static pa_context * ctx;
 extern const char * const sys_siglist [];
 
 _Noreturn void
 signal_handler (signed);
+
+void
+dump_sink_info (pa_context *, const pa_sink_info *, signed, void *);
+
+void
+ctx_state_cb (pa_context *, void *);
 
 signed
 get_en_state (char *);

@@ -30,6 +30,10 @@ main (signed argc, char * argv []) {
     bool stdout_flag         = false;
     char status_line [104]   = "";
 
+    mainloop = pa_mainloop_new();
+    ctx = pa_context_new(pa_mainloop_get_api(mainloop), NULL);
+    is_muted = 0;
+
     const char * vos = "hs";
     for ( signed oi = 0, c = getopt_long(argc, argv, vos, os, &oi);
           c != -1; c = getopt_long(argc, argv, vos, os, &oi) ) {
@@ -38,6 +42,21 @@ main (signed argc, char * argv []) {
             case 's': stdout_flag = true; break;
         }
     }
+
+    if ( !ctx ) {
+        syslog(LOG_ERR, "Failed to initialize PulseAudio Context\n");
+        status = EXIT_FAILURE;
+        goto cleanup;
+    }
+
+    pa_stat = pa_context_connect(ctx, NULL, 0, NULL);
+    if ( pa_stat ) {
+        syslog(LOG_ERR, "Failed to connect to PulseAudio Context\n");
+        status = EXIT_FAILURE;
+        goto cleanup;
+    }
+
+    pa_context_set_state_callback(ctx, ctx_state_cb, NULL);
 
     if ( !stdout_flag ) {
         dpy = XOpenDisplay(NULL);
@@ -49,7 +68,9 @@ main (signed argc, char * argv []) {
         printf("\x1b[?25l");
     }
 
+
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
+        pa_mainloop_iterate(mainloop, 0, &pa_stat);
         UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
         UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
         UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
@@ -78,6 +99,10 @@ main (signed argc, char * argv []) {
 
     cleanup:
         syslog(LOG_INFO, "Terminating\n");
+
+        pa_context_unref(ctx);
+        pa_mainloop_free(mainloop);
+
         if ( dpy ) {
             XCloseDisplay(dpy);
         } else {
@@ -92,6 +117,10 @@ void
 signal_handler (signed signum) {
 
     syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
+
+    pa_context_unref(ctx);
+    pa_mainloop_free(mainloop);
+
     if ( dpy ) {
         XCloseDisplay(dpy);
     } else {
@@ -109,6 +138,52 @@ signal_handler (signed signum) {
             exit(EXIT_FAILURE); \
         } \
     } while ( false )
+
+void
+dump_sink_info (pa_context * c, const pa_sink_info * i, signed e, void * u) {
+
+    (void )c; (void )e; (void )u;
+    syslog(LOG_INFO, "Updating audio values\n");
+
+    if ( i ) {
+        cvol = i->volume.values[0];
+        is_muted = i->mute;
+    }
+}
+
+void
+ctx_state_cb (pa_context * c, void * udata) {
+
+    (void )udata;
+
+    if ( !c ) {
+        syslog(LOG_ERR, "Tried to check state of a NULL context\n");
+        exit(EXIT_FAILURE);
+    }
+
+    pa_operation * op = NULL;
+
+    switch (pa_context_get_state(c)) {
+        case PA_CONTEXT_UNCONNECTED:
+        case PA_CONTEXT_CONNECTING:
+        case PA_CONTEXT_AUTHORIZING:
+        case PA_CONTEXT_SETTING_NAME: break;
+
+        case PA_CONTEXT_READY:
+            op = pa_context_get_sink_info_by_index(c, PASNK, dump_sink_info, NULL);
+            if ( !op ) { syslog(LOG_ERR, "Failed to query sink info\n"); }
+            break;
+
+        case PA_CONTEXT_TERMINATED:
+            syslog(LOG_INFO, "PulseAudio Context was terminated\n");
+            break;
+
+        case PA_CONTEXT_FAILED:
+            syslog(LOG_ERR, "Failed to initialize PulseAudio Context: %s\n", pa_strerror(pa_context_errno(c)));
+            exit(EXIT_FAILURE);
+    }
+}
+
 
 signed
 get_en_state (char * state) {
@@ -167,6 +242,7 @@ signed
 get_aud_volume (uint16_t * volume) {
 
     check_null_arg(volume);
+    *volume = (uint16_t )(cvol * 100 / 65535);
     return EXIT_SUCCESS;
 }
 
@@ -174,6 +250,7 @@ signed
 get_aud_mute (char * mute) {
 
     check_null_arg(mute);
+    *mute = is_muted ? 'M' : '%';
     return EXIT_SUCCESS;
 }
 
