@@ -38,7 +38,7 @@
 #define PT_INTERVAL 15
 
 static const char wl_bars [][22] = {
-	"No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"
+    "No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"
 };
 
 static struct option os [] = {
