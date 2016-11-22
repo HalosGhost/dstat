@@ -65,7 +65,7 @@ main (signed argc, char * argv []) {
             return EXIT_FAILURE;
         }
     } else {
-        printf("\x1b[?25l");
+        fputs("\x1b[?25l", stdout);
     }
 
 
@@ -124,7 +124,7 @@ signal_handler (signed signum) {
     if ( dpy ) {
         XCloseDisplay(dpy);
     } else {
-        printf("\x1b[?25h");
+        fputs("\x1b[?25h", stdout);
     }
 
     closelog();
