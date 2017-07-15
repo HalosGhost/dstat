@@ -1,5 +1,10 @@
 #pragma once
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#define _POSIX_C_SOURCE 1
+#pragma clang diagnostic pop
+
 #include <stdint.h>
 #include <inttypes.h>
 #include <errno.h>
@@ -13,7 +18,8 @@
 #include <syslog.h>
 #include <signal.h>
 #include <getopt.h>
-#include <pulse/pulseaudio.h>
+#include <alsa/asoundlib.h>
+#include <alsa/control.h>
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
@@ -23,11 +29,11 @@
 #define EPATH "/sys/class/net/" EFACE "/operstate"
 #define WFACE "wl0"
 #define WPATH "/proc/net/wireless"
-#define PASNK 0
+#define SNDDV "default"
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define LNFMT "E: %s | W: %s | A: %" PRIu16 "%s | B: %" PRIu8 "%s | %s%s"
+#define LNFMT " E: %s | W: %s | A: %ld%s | B: %" PRIu8 "%s | %s%s"
 #define STCHR "\n"
 
 #define EN_INTERVAL 60
@@ -55,20 +61,13 @@ static const char usage_str [] =
     "  -s, --stdout    Output to stdout";
 
 static Display * dpy;
-static uint32_t cvol;
-static signed is_muted, pa_stat;
-static pa_mainloop * mainloop;
-static pa_context * ctx;
 extern const char * const sys_siglist [];
+static snd_hctl_t * alsa_handle;
+static snd_ctl_elem_id_t * alsa_sid;
+static snd_ctl_elem_value_t * alsa_control;
 
 _Noreturn void
 signal_handler (signed);
-
-void
-dump_sink_info (pa_context *, const pa_sink_info *, signed, void *);
-
-void
-ctx_state_cb (pa_context *, void *);
 
 signed
 get_en_state (char *);
@@ -86,7 +85,7 @@ signed
 get_time_state (char *);
 
 signed
-get_aud_volume (uint16_t *);
+get_aud_volume (long *);
 
 signed
 get_aud_mute (char *);
