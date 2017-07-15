@@ -9,6 +9,19 @@
         } \
     } while ( false )
 
+#define general_termination() \
+    do { \
+        snd_hctl_close(alsa_handle); \
+        if ( alsa_control ) { snd_ctl_elem_value_free(alsa_control); } \
+        if ( alsa_sid ) { snd_ctl_elem_id_free(alsa_sid); } \
+        if ( dpy ) { \
+            XCloseDisplay(dpy); \
+        } else { \
+            printf("\x1b[?25h"); \
+        } \
+        closelog(); \
+    } while ( false )
+
 signed
 main (signed argc, char * argv []) {
 
@@ -31,7 +44,16 @@ main (signed argc, char * argv []) {
     char status_line [105]   = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
+    if ( !alsa_sid ) {
+        syslog(LOG_ERR, "Could not allocate ALSA element\n");
+        goto cleanup;
+    }
+
     snd_ctl_elem_value_malloc(&alsa_control);
+    if ( !alsa_control ) {
+        syslog(LOG_ERR, "Could not allocate ALSA control\n");
+        goto cleanup;
+    }
 
     snd_hctl_open(&alsa_handle, SNDDV, 0);
     snd_hctl_load(alsa_handle);
@@ -56,7 +78,6 @@ main (signed argc, char * argv []) {
     } else {
         fputs("\x1b[?25l", stdout);
     }
-
 
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
         UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
@@ -87,19 +108,7 @@ main (signed argc, char * argv []) {
 
     cleanup:
         syslog(LOG_INFO, "Terminating\n");
-
-        snd_hctl_close(alsa_handle);
-
-        if ( alsa_control ) { snd_ctl_elem_value_free(alsa_control); }
-        if ( alsa_sid ) { snd_ctl_elem_id_free(alsa_sid); }
-
-        if ( dpy ) {
-            XCloseDisplay(dpy);
-        } else {
-            printf("\x1b[?25h");
-        }
-
-        closelog();
+        general_termination();
         return status;
 }
 
@@ -107,14 +116,7 @@ void
 signal_handler (signed signum) {
 
     syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
-
-    if ( dpy ) {
-        XCloseDisplay(dpy);
-    } else {
-        fputs("\x1b[?25h", stdout);
-    }
-
-    closelog();
+    general_termination();
     exit(EXIT_SUCCESS);
 }
 
@@ -190,7 +192,7 @@ get_aud_volume (long * volume) {
     snd_ctl_elem_value_set_id(alsa_control, alsa_sid);
 
     snd_hctl_elem_read(alsa_element, alsa_control);
-    *volume = snd_ctl_elem_value_get_integer(alsa_control, 0) * 100 / (1 << 16);
+    *volume = snd_ctl_elem_value_get_integer(alsa_control, 0) * 100 / ((1 << 16) - 1);
 
     return EXIT_SUCCESS;
 }
