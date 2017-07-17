@@ -7,13 +7,14 @@ usage () {
     printf "  --en-ival='#'      Update LAN status every # seconds (default: 60)\n"
     printf "  --wl-iface='ID'    Monitor WLAN device named 'ID' (default: wl0)\n"
     printf "  --wl-ival='#'      Update WLAN status every # seconds (default: 30)\n"
-    printf "  --pa-sink='#'      Monitor Pulse sink numbered # (default: 0)\n"
-    printf "  --pa-ival='#'      Update sink status every # seconds (default: 30)\n"
+    printf "  --aud-dev='ID'     Monitor ALSA Device named 'ID' (default: 'default')\n"
+    printf "  --aud-ival='#'     Update sink status every # seconds (default: 30)\n"
     printf "  --bat-dev='ID'     Monitor battery device named 'ID' (default: BAT0)\n"
     printf "  --bat-ival='#'     Update battery status every # seconds (default: 30)\n"
     printf "  --tm-fmt='FMT'     Format the clock using 'FMT' (default: '%%H.%%M (%%Z) | %%A, %%d %%B %%Y')\n"
     printf "  --tm-ival='#'      Update clock every # seconds (default: 15)\n"
     printf "  --pt-ival='#'      Repaint the bar every # seconds (default: 15)\n"
+    printf "  --out-char='C'     Paint C for line-endings for stdout (default: '\\\n')\n"
     printf "  --reset-config     Reset configuration to the defaults\n"
 }
 
@@ -37,10 +38,11 @@ default_config () {
     update     TMFMT       '%H.%M (%Z) | %A, %d %B %Y'
     update_num TM_INTERVAL 15
     update_num PT_INTERVAL 15
+    update     STCHR       '\\n'
 }
 
 show_value () {
-    printf "$1: %s\n" "$('grep' "#define $2" ./src/dstat.h | sed -re "s/#define $2 (.*)$/\\1/")"
+    printf '%s: %s\n' "$1" "$('grep' "#define $2" ./src/dstat.h | sed -re "s/#define $2 (.*)$/\\1/")"
 }
 
 show_config () {
@@ -48,20 +50,15 @@ show_config () {
     show_value 'LAN Interface Update Interval' EN_INTERVAL
     show_value 'Wireless Interface' WFACE
     show_value 'WLAN Interface Update Interval' WL_INTERVAL
-    show_value 'PulseAudio Sink' PASNK
-    show_value 'PulseAudio Update Interval' VL_INTERVAL
+    show_value 'ALSA Sound Device' SNDDV
+    show_value 'Audio Info Update Interval' VL_INTERVAL
     show_value 'Battery Device' BATDV
     show_value 'Battery Update Interval' BT_INTERVAL
     show_value 'Clock Format String' TMFMT
     show_value 'Clock Update Interval' TM_INTERVAL
     show_value 'Bar Repaint Interval' PT_INTERVAL
+    show_value 'Stdout Line Ending' STCHR
 }
-
-if [[ $# == 0 ]]; then
-    default_config
-    show_config
-    exit 0
-fi
 
 for i in "$@"; do
     case "$i" in
@@ -70,14 +67,15 @@ for i in "$@"; do
         --en-ival=*)    update_num EN_INTERVAL "${i#*=}"; shift;;
         --wl-iface=*)   update     WFACE       "${i#*=}"; shift;;
         --wl-ival=*)    update_num WL_INTERVAL "${i#*=}"; shift;;
-        --pa-sink=*)    update_num PASNK       "${i#*=}"; shift;;
-        --pa-ival=*)    update_num VL_INTERVAL "${i#*=}"; shift;;
+        --aud-dev=*)    update     SNDDV       "${i#*=}"; shift;;
+        --aud-ival=*)   update_num VL_INTERVAL "${i#*=}"; shift;;
         --bat-dev=*)    update     BATDV       "${i#*=}"; shift;;
         --bat-ival=*)   update_num BT_INTERVAL "${i#*=}"; shift;;
         --tm-fmt=*)     update     TMFMT       "${i#*=}"; shift;;
         --tm-ival=*)    update_num TM_INTERVAL "${i#*=}"; shift;;
         --pt-ival=*)    update_num PT_INTERVAL "${i#*=}"; shift;;
-        --reset-config) default_config; exit 0;;
+        --out-char=*)   update     STCHR       "${i#*=}"; shift;;
+        --reset-config) default_config;;
     esac
 done
 
