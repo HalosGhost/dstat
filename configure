@@ -31,7 +31,7 @@ default_config () {
     update_num EN_INTERVAL 60
     update     WFACE       wl0
     update_num WL_INTERVAL 30
-    update_num PASNK       0
+    update     SNDDV       'default'
     update_num VL_INTERVAL 30
     update     BATDV       BAT0
     update_num BT_INTERVAL 30
