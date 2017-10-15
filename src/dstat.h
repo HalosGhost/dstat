@@ -32,8 +32,9 @@
 #define SNDDV "default"
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
+#define BTFMT "; %.2lu:%.2lu:%.2lu till %s"
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define LNFMT " E: %s | W: %s | A: %ld%s | B: %" PRIu8 "%s | %s%s"
+#define LNFMT " E: %s | W: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
 #define STCHR "\n"
 
 #define EN_INTERVAL 60
@@ -76,10 +77,7 @@ signed
 get_wl_strength (uint8_t *);
 
 signed
-get_bat_cap (uint8_t *);
-
-signed
-get_bat_state (char *);
+get_bat_state (uint8_t *, double *, char *);
 
 signed
 get_time_state (char *);

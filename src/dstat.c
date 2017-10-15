@@ -37,11 +37,12 @@ main (signed argc, char * argv []) {
     uint8_t wl_strength [1]  = { 0 };
     long audio_vol [1]       = { 0 };
     char audio_mut [2]       = "%";
-    uint8_t bat_capacity [1] = { 0 };
-    char bat_state [3]       = "D";
-    char time_state [44]     = "00.00 (GMT) | Thursday, 01 January";
+    uint8_t bat_cap [1]      = { 0 };
+    double bat_pow [1]       = { -100 };
+    char bat_time [29]       = " | 00:00:00 till replenished";
+    char time_state [44]     = "00.00 (UTC) | Monday, 01 January 0001";
     bool stdout_flag         = false;
-    char status_line [105]   = "";
+    char status_line [136]   = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -84,17 +85,16 @@ main (signed argc, char * argv []) {
         UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
         UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
         UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
-        UPDATE_MODULE_AT(get_bat_cap(bat_capacity), BT_INTERVAL);
-        UPDATE_MODULE_AT(get_bat_state(bat_state), BT_INTERVAL);
+        UPDATE_MODULE_AT(get_bat_state(bat_cap, bat_pow, bat_time), BT_INTERVAL);
         UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
 
         if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, 105, LNFMT,
+            snprintf(status_line, 135 - !stdout_flag, LNFMT,
                     en_state,
                     wl_bars[*wl_strength],
                     *audio_vol, audio_mut,
-                    *bat_capacity, bat_state,
-                    time_state, STCHR);
+                    *bat_cap, *bat_pow, bat_time,
+                    time_state, stdout_flag ? STCHR : " ");
 
             if ( dpy ) {
                 XStoreName(dpy, DefaultRootWindow(dpy), status_line);
@@ -177,7 +177,7 @@ get_wl_strength (uint8_t * strength) {
         n = 0;
     } fclose(in);
 
-    *strength = !n ? n : (n / 10) + (n < 7);
+    *strength = !n ? n : n * 7 / 100;
     return EXIT_SUCCESS;
 }
 
@@ -214,53 +214,114 @@ get_aud_mute (char * mute) {
 }
 
 signed
-get_bat_cap (uint8_t * capacity) {
+get_bat_state (uint8_t * cap, double * pow, char * time) {
 
-    check_null_arg(capacity);
-
-    signed errsv = 0;
-    errno = 0;
-    FILE * in = fopen(BPATH "/capacity", "r");
-    if ( !in ) {
-        errsv = errno;
-        syslog(LOG_ERR, FAIL_OPEN(BPATH) "/capacity: %s\n", strerror(errsv));
-        return EXIT_FAILURE;
-    }
-
-    errno = 0;
-    if ( fscanf(in, "%" SCNu8, capacity) != 1 ) {
-        errsv = errno;
-        syslog(LOG_ERR, FAIL_READ(BPATH) "/capacity: %s\n", strerror(errsv));
-        fclose(in);
-        return EXIT_FAILURE;
-    } fclose(in); return EXIT_SUCCESS;
-}
-
-signed
-get_bat_state (char * state) {
-
-    check_null_arg(state);
+    check_null_arg(pow);
+    check_null_arg(time);
 
     signed errsv = 0;
     errno = 0;
-    FILE * in = fopen(BPATH "/status", "r");
+    FILE * in = fopen(BPATH "/uevent", "r");
     if ( !in ) {
         errsv = errno;
-        syslog(LOG_ERR, FAIL_OPEN(BPATH) "/status: %s\n", strerror(errsv));
+        syslog(LOG_ERR, FAIL_OPEN(BPATH) "/uevent: %s\n", strerror(errsv));
         return EXIT_FAILURE;
     }
 
-    char st = 0;
-    errno = 0;
-    if ( fscanf(in, "%c", &st) != 1 ) {
-        errsv = errno;
-        syslog(LOG_ERR, FAIL_READ(BPATH) "/status: %s\n", strerror(errsv));
-        fclose(in);
-        return EXIT_FAILURE;
-    } fclose(in);
+    enum { DISCHARGING, EMPTY, CHARGING, FULL } status = EMPTY;
+    long power_now = 0,
+         current_now = 0;
+    unsigned long voltage_now = 0,
+                  energy_full_design = 0,
+                  energy_full = 0,
+                  charge_full = 0,
+                  charge_full_design = 0,
+                  energy_now = 0,
+                  charge_now = 0;
+    uint8_t capacity = 0;
 
-    snprintf(state, sizeof "ϟ", "%s", st == 'C' ? "ϟ" : "D");
-    return EXIT_SUCCESS;
+    char keybuf [64] = "", // pretty sure it should never be larger than 32
+         val    [64] = "";
+
+    while ( fscanf(in, "%[^=]=%s\n", keybuf, val) != EOF ) {
+        char * key = keybuf + sizeof("POWER_SUPPLY_") - 1; // ignore nul byte
+
+        if ( !strncmp(key, "STATUS", 6) ) {
+            switch ( val[0] ) {
+                case 'D': status = DISCHARGING; break;
+                case 'C': status = CHARGING; break;
+                case 'F': status = FULL; break;
+            }
+        } else if ( !strncmp(key, "POWER_NOW", 9) ) {
+            sscanf(val, "%ld", &power_now);
+        } else if ( !strncmp(key, "CURRENT_NOW", 11) ) {
+            sscanf(val, "%ld", &current_now);
+        } else if ( !strncmp(key, "VOLTAGE_NOW", 11) ) {
+            sscanf(val, "%lu", &voltage_now);
+        } else if ( !strncmp(key, "ENERGY_FULL_DESIGN", 18) ) {
+            sscanf(val, "%lu", &energy_full_design);
+        } else if ( !strncmp(key, "ENERGY_FULL", 11) ) {
+            sscanf(val, "%lu", &energy_full);
+        } else if ( !strncmp(key, "CHARGE_FULL_DESIGN", 18) ) {
+            sscanf(val, "%lu", &charge_full_design);
+        } else if ( !strncmp(key, "CHARGE_FULL", 11) ) {
+            sscanf(val, "%lu", &charge_full);
+        } else if ( !strncmp(key, "ENERGY_NOW", 10) ) {
+            sscanf(val, "%lu", &energy_now);
+        } else if ( !strncmp(key, "CHARGE_NOW", 10) ) {
+            sscanf(val, "%lu", &charge_now);
+        } else if ( !strncmp(key, "CAPACITY", 8) ) {
+            sscanf(val, "%" SCNu8, &capacity);
+        }
+    }
+
+    fclose(in);
+
+    *cap = capacity;
+
+    voltage_now /= 1000;
+
+    power_now   /= 1000;
+    current_now /= 1000;
+
+    energy_now         /= voltage_now;
+    energy_full        /= voltage_now;
+    energy_full_design /= voltage_now;
+    charge_now         /= 1000;
+    charge_full        /= 1000;
+    charge_full_design /= 1000;
+
+    long rate = power_now ? power_now : current_now;
+    rate = rate >= 0 ? rate : -rate;
+    unsigned long max_capacity = charge_full        ? charge_full        :
+                                 energy_full        ? energy_full        :
+                                 charge_full_design ? charge_full_design :
+                                 energy_full_design ? energy_full_design : 0;
+    unsigned long cur_capacity = charge_now ? charge_now : energy_now;
+
+    unsigned long target = cur_capacity;
+    double power = (signed long )-voltage_now * rate / 1000000.0;
+    if ( status == CHARGING ) {
+        target = max_capacity - cur_capacity;
+        power *= -1;
+    }
+
+    *pow = power;
+
+    unsigned long seconds = 3600 * target / (unsigned long )rate;
+    unsigned long hours = seconds / 3600;
+    seconds -= hours * 3600;
+
+    unsigned long minutes = seconds / 60;
+    seconds -= minutes * 60;
+
+    const char * when = status == CHARGING ? "replenished" : "depleted";
+
+    if ( hours || minutes || seconds ) {
+        snprintf(time, 29, BTFMT, hours, minutes, seconds, when);
+    } else {
+        snprintf(time, 29, "");
+    } return EXIT_SUCCESS;
 }
 
 signed

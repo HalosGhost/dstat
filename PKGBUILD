@@ -9,7 +9,7 @@ url='https://github.com/HalosGhost/dstat'
 arch=('i686' 'x86_64')
 license=('GPL2')
 
-depends=('xorg-server')
+optdepends=('xorg-server')
 makedepends=('git' 'tup' 'clang')
 
 source=('git+https://github.com/HalosGhost/dstat.git')
