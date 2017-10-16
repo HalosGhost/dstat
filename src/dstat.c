@@ -188,7 +188,7 @@ get_wl_essid (char * ssid) {
 
     check_null_arg(ssid);
 
-    strncpy(ssid, 2, "W");
+    strncpy(ssid, "W", 2);
 
     signed sock = socket(AF_INET, SOCK_DGRAM, 0);
     struct iwreq w;
