@@ -186,6 +186,10 @@ get_wl_strength (uint8_t * strength) {
 signed
 get_wl_essid (char * ssid) {
 
+    check_null_arg(ssid);
+
+    strncpy(ssid, 2, "W");
+
     signed sock = socket(AF_INET, SOCK_DGRAM, 0);
     struct iwreq w;
 
