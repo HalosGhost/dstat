@@ -35,6 +35,7 @@ main (signed argc, char * argv []) {
 
     char en_state [2]        = "D";
     uint8_t wl_strength [1]  = { 0 };
+    char wl_essid [33]       = "W";
     long audio_vol [1]       = { 0 };
     char audio_mut [2]       = "%";
     uint8_t bat_cap [1]      = { 0 };
@@ -42,7 +43,7 @@ main (signed argc, char * argv []) {
     char bat_time [29]       = " | 00:00:00 till replenished";
     char time_state [44]     = "00.00 (UTC) | Monday, 01 January 0001";
     bool stdout_flag         = false;
-    char status_line [136]   = "";
+    char status_line [159]   = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -83,6 +84,7 @@ main (signed argc, char * argv []) {
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
         UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
         UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
+        UPDATE_MODULE_AT(get_wl_essid(wl_essid), WL_INTERVAL);
         UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
         UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
         UPDATE_MODULE_AT(get_bat_state(bat_cap, bat_pow, bat_time), BT_INTERVAL);
@@ -91,7 +93,7 @@ main (signed argc, char * argv []) {
         if ( !(c_time % PT_INTERVAL) ) {
             snprintf(status_line, 135 - !stdout_flag, LNFMT,
                     en_state,
-                    wl_bars[*wl_strength],
+                    wl_essid, wl_bars[*wl_strength],
                     *audio_vol, audio_mut,
                     *bat_cap, *bat_pow, bat_time,
                     time_state, stdout_flag ? STCHR : " ");
@@ -178,6 +180,24 @@ get_wl_strength (uint8_t * strength) {
     } fclose(in);
 
     *strength = !n ? n : n * 7 / 100;
+    return EXIT_SUCCESS;
+}
+
+signed
+get_wl_essid (char * ssid) {
+
+    signed sock = socket(AF_INET, SOCK_DGRAM, 0);
+    struct iwreq w;
+
+    strncpy(w.ifr_ifrn.ifrn_name, WFACE, IFNAMSIZ);
+
+    w.u.essid.pointer = ssid;
+    w.u.data.length = IW_ESSID_MAX_SIZE;
+    w.u.data.flags = 0;
+
+    ioctl(sock, SIOCGIWESSID, &w);
+    close(sock);
+
     return EXIT_SUCCESS;
 }
 

@@ -20,6 +20,11 @@
 #include <getopt.h>
 #include <alsa/asoundlib.h>
 #include <alsa/control.h>
+#include <linux/if.h>
+#include <linux/wireless.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stropts.h>
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
@@ -34,7 +39,7 @@
 #define BPATH "/sys/class/power_supply/" BATDV
 #define BTFMT "; %.2lu:%.2lu:%.2lu till %s"
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define LNFMT " E: %s | W: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
+#define LNFMT " E: %s | %s: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
 #define STCHR "\n"
 
 #define EN_INTERVAL 60
@@ -75,6 +80,9 @@ get_en_state (char *);
 
 signed
 get_wl_strength (uint8_t *);
+
+signed
+get_wl_essid (char *);
 
 signed
 get_bat_state (uint8_t *, double *, char *);
