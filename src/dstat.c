@@ -321,6 +321,8 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
         rate /= 10;
     }
 
+    rate = rate ? rate : 1;
+
     unsigned long max_capacity = charge_full        ? charge_full        :
                                  energy_full        ? energy_full        :
                                  charge_full_design ? charge_full_design :
