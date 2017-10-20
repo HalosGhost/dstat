@@ -240,6 +240,7 @@ get_aud_mute (char * mute) {
 signed
 get_bat_state (uint8_t * cap, double * pow, char * time) {
 
+    check_null_arg(cap);
     check_null_arg(pow);
     check_null_arg(time);
 
