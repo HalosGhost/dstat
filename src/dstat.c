@@ -33,17 +33,17 @@ main (signed argc, char * argv []) {
     signal(3, signal_handler);
     signal(15, signal_handler);
 
-    char en_state [2]        = "D";
-    uint8_t wl_strength [1]  = { 0 };
-    char wl_essid [33]       = "W";
-    long audio_vol [1]       = { 0 };
-    char audio_mut [2]       = "%";
-    uint8_t bat_cap [1]      = { 0 };
-    double bat_pow [1]       = { -100 };
-    char bat_time [29]       = " | 00:00:00 till replenished";
-    char time_state [44]     = "00.00 (UTC) | Monday, 01 January 0001";
-    bool stdout_flag         = false;
-    char status_line [159]   = "";
+    char en_state [2]                     = "D";
+    uint8_t wl_strength [1]               = { 0 };
+    char wl_essid [IW_ESSID_MAX_SIZE + 1] = "W";
+    long audio_vol [1]                    = { 0 };
+    char audio_mut [2]                    = "%";
+    uint8_t bat_cap [1]                   = { 0 };
+    double bat_pow [1]                    = { -100 };
+    char bat_time [28]                    = " 00:00:00 till replenished";
+    char time_state [44]                  = "00.00 (UTC) | Monday, 01 January 0001";
+    bool stdout_flag                      = false;
+    char status_line [158]                = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -188,7 +188,8 @@ get_wl_essid (char * ssid) {
 
     check_null_arg(ssid);
 
-    strncpy(ssid, "W", 2);
+    memset(ssid, 0, IW_ESSID_MAX_SIZE);
+    *ssid = 'W';
 
     signed sock = socket(AF_INET, SOCK_DGRAM, 0);
     struct iwreq w;
@@ -349,9 +350,9 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
     const char * when = status == CHARGING ? "replenished" : "depleted";
 
     if ( hours || minutes || seconds ) {
-        snprintf(time, 29, BTFMT, hours, minutes, seconds, when);
+        snprintf(time, 28, BTFMT, hours, minutes, seconds, when);
     } else {
-        snprintf(time, 29, "");
+        snprintf(time, 28, "");
     } return EXIT_SUCCESS;
 }
 

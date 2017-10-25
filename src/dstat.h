@@ -37,7 +37,7 @@
 #define SNDDV "default"
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
-#define BTFMT "; %.2lu:%.2lu:%.2lu till %s"
+#define BTFMT " %.2lu:%.2lu:%.2lu till %s"
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
 #define LNFMT " E: %s | %s: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
 #define STCHR "\n"
