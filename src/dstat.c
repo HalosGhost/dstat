@@ -325,6 +325,17 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
 
     rate = rate ? rate : 1;
 
+    static long running = 0;
+    static long samples = 0;
+    if ( samples < 0 || samples == LONG_MAX ) {
+        samples = 1;
+        running = 0;
+    } else {
+        ++samples;
+    }
+
+    running += rate;
+
     unsigned long max_capacity = charge_full        ? charge_full        :
                                  energy_full        ? energy_full        :
                                  charge_full_design ? charge_full_design :
@@ -332,7 +343,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
     unsigned long cur_capacity = charge_now ? charge_now : energy_now;
 
     unsigned long target = cur_capacity;
-    double power = (signed long )-voltage_now * rate / 1000000.0;
+    double power = (signed long )-voltage_now * (running / samples) / 1000000.;
     if ( status == CHARGING ) {
         target = max_capacity - cur_capacity;
         power *= -1;

@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
