@@ -11,6 +11,7 @@
 
 #define general_termination() \
     do { \
+        syslog(LOG_INFO, "Terminating\n"); \
         snd_hctl_close(alsa_handle); \
         if ( alsa_control ) { snd_ctl_elem_value_free(alsa_control); } \
         if ( alsa_sid ) { snd_ctl_elem_id_free(alsa_sid); } \
@@ -43,7 +44,7 @@ main (signed argc, char * argv []) {
     char bat_time [25]                    = " 00:00 till replenished";
     char time_state [44]                  = "00.00 (UTC) | Monday, 01 January 0001";
     bool stdout_flag                      = false;
-    char status_line [155]                = "";
+    char status_line [LNSZE]              = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -91,7 +92,7 @@ main (signed argc, char * argv []) {
         UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
 
         if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, 135 - !stdout_flag, LNFMT,
+            snprintf(status_line, LNSZE - !stdout_flag, LNFMT,
                     en_state,
                     wl_essid, wl_bars[*wl_strength],
                     *audio_vol, audio_mut,
@@ -109,7 +110,6 @@ main (signed argc, char * argv []) {
     }
 
     cleanup:
-        syslog(LOG_INFO, "Terminating\n");
         general_termination();
         return status;
 }
@@ -117,7 +117,7 @@ main (signed argc, char * argv []) {
 void
 signal_handler (signed signum) {
 
-    syslog(LOG_INFO, "Caught %s; Terminating\n", sys_siglist[signum]);
+    syslog(LOG_INFO, "Caught %s\n", sys_siglist[signum]);
     general_termination();
     exit(EXIT_SUCCESS);
 }

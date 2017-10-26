@@ -42,6 +42,7 @@
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
 #define LNFMT " E: %s | %s: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
 #define STCHR "\n"
+#define LNSZE 155
 
 #define EN_INTERVAL 60
 #define WL_INTERVAL 30
