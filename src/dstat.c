@@ -351,7 +351,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
 
     *pow = power;
 
-    unsigned long seconds = 3600 * target / (unsigned long )running;
+    unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
     unsigned long hours = seconds / 3600;
     seconds -= hours * 3600;
 
