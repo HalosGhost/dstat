@@ -40,10 +40,10 @@ main (signed argc, char * argv []) {
     char audio_mut [2]                    = "%";
     uint8_t bat_cap [1]                   = { 0 };
     double bat_pow [1]                    = { -100 };
-    char bat_time [28]                    = " 00:00:00 till replenished";
+    char bat_time [25]                    = " 00:00 till replenished";
     char time_state [44]                  = "00.00 (UTC) | Monday, 01 January 0001";
     bool stdout_flag                      = false;
-    char status_line [158]                = "";
+    char status_line [155]                = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -353,17 +353,14 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
     unsigned long hours = seconds / 3600;
-    seconds -= hours * 3600;
-
-    unsigned long minutes = seconds / 60;
-    seconds -= minutes * 60;
+    unsigned long minutes = (seconds - hours * 3600) / 60;
 
     const char * when = status == CHARGING ? "replenished" : "depleted";
 
     if ( hours || minutes || seconds ) {
-        snprintf(time, 28, BTFMT, hours, minutes, seconds, when);
+        snprintf(time, 25, BTFMT, hours, minutes, when);
     } else {
-        snprintf(time, 28, "");
+        snprintf(time, 2, "");
     } return EXIT_SUCCESS;
 }
 
