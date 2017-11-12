@@ -2,10 +2,8 @@
 
 #define UPDATE_MODULE_AT(mod,ival) \
     do { \
-        if ( !(c_time % (ival)) ) { \
-            if ( (status = (mod)) != EXIT_SUCCESS ) { \
-                goto cleanup; \
-            } \
+        if ( !(c_time % (ival)) && (status = (mod)) != EXIT_SUCCESS ) { \
+            goto cleanup; \
         } \
     } while ( false )
 
@@ -34,17 +32,28 @@ main (signed argc, char * argv []) {
     signal(3, signal_handler);
     signal(15, signal_handler);
 
-    char en_state [2]                     = "D";
-    uint8_t wl_strength [1]               = { 0 };
-    char wl_essid [IW_ESSID_MAX_SIZE + 1] = "W";
-    long audio_vol [1]                    = { 0 };
-    char audio_mut [2]                    = "%";
-    uint8_t bat_cap [1]                   = { 0 };
-    double bat_pow [1]                    = { -100 };
-    char bat_time [25]                    = " 00:00 till replenished";
-    char time_state [44]                  = "00.00 (UTC) | Monday, 01 January 0001";
-    bool stdout_flag                      = false;
-    char status_line [LNSZE]              = "";
+    #if ENABLE_MOD_EN == 1
+        char en_state [2] = "D";
+    #endif
+    #if ENABLE_MOD_WL == 1
+        uint8_t wl_strength [1] = { 0 };
+        char wl_essid [IW_ESSID_MAX_SIZE + 1] = "W";
+    #endif
+    #if ENABLE_MOD_AU == 1
+        long audio_vol [1] = { 0 };
+        char audio_mut [2] = "%";
+    #endif
+    #if ENABLE_MOD_BT == 1
+        uint8_t bat_cap [1] = { 0 };
+        double bat_pow [1] = { -100 };
+        char bat_time [25] = " 00:00 till replenished";
+    #endif
+    #if ENABLE_MOD_CK == 1
+        char time_state [44] = "00.00 (UTC) | Monday, 01 January 0001";
+    #endif
+
+    bool stdout_flag = false;
+    char status_line [LNSZE] = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
     if ( !alsa_sid ) {
@@ -83,21 +92,58 @@ main (signed argc, char * argv []) {
     }
 
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
-        UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
-        UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
-        UPDATE_MODULE_AT(get_wl_essid(wl_essid), WL_INTERVAL);
-        UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
-        UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
-        UPDATE_MODULE_AT(get_bat_state(bat_cap, bat_pow, bat_time), BT_INTERVAL);
-        UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
+        #if ENABLE_MOD_EN == 1
+            UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
+        #endif
 
+        #if ENABLE_MOD_WL == 1
+            UPDATE_MODULE_AT(get_wl_strength(wl_strength), WL_INTERVAL);
+            UPDATE_MODULE_AT(get_wl_essid(wl_essid), WL_INTERVAL);
+        #endif
+
+        #if ENABLE_MOD_AU == 1
+            UPDATE_MODULE_AT(get_aud_volume(audio_vol), VL_INTERVAL);
+            UPDATE_MODULE_AT(get_aud_mute(audio_mut), VL_INTERVAL);
+        #endif
+
+        #if ENABLE_MOD_BT == 1
+            UPDATE_MODULE_AT(get_bat_state(bat_cap, bat_pow, bat_time), BT_INTERVAL);
+        #endif
+
+        #if ENABLE_MOD_CK == 1
+            UPDATE_MODULE_AT(get_time_state(time_state), TM_INTERVAL);
+        #endif
+
+        signed amount_written = 1;
         if ( !(c_time % PT_INTERVAL) ) {
-            snprintf(status_line, LNSZE - !stdout_flag, LNFMT,
-                    en_state,
-                    wl_essid, wl_bars[*wl_strength],
-                    *audio_vol, audio_mut,
-                    *bat_cap, *bat_pow, bat_time,
-                    time_state, stdout_flag ? STCHR : " ");
+            *status_line = ' ';
+
+            #define write_mod(size, fmt, ...) amount_written += snprintf( \
+                status_line + amount_written, (size), (fmt), __VA_ARGS__)
+
+            #if ENABLE_MOD_EN == 1
+                write_mod(MOD_EN_SIZE, "E: %s | ", en_state);
+            #endif
+
+            #if ENABLE_MOD_WL == 1
+                write_mod(MOD_WL_SIZE, "%s: %s | ", wl_essid, \
+                          wl_bars[*wl_strength]);
+            #endif
+
+            #if ENABLE_MOD_AU == 1
+                write_mod(MOD_AU_SIZE, "A: %ld%s | ", *audio_vol, audio_mut);
+            #endif
+
+            #if ENABLE_MOD_BT == 1
+                write_mod(MOD_BT_SIZE, "B: %" PRIu8 "%% (%+.2lgW)%s | ", \
+                          *bat_cap, *bat_pow, bat_time);
+            #endif
+
+            #if ENABLE_MOD_CK == 1
+                write_mod(MOD_CK_SIZE, "%s", time_state);
+            #endif
+
+            write_mod(2, "%s", stdout_flag ? STCHR : " ");
 
             if ( dpy ) {
                 XStoreName(dpy, DefaultRootWindow(dpy), status_line);
@@ -371,7 +417,7 @@ get_time_state (char * state) {
 
     time_t current;
     time(&current);
-    if ( !strftime(state, 43, TMFMT, localtime(&current)) ) {
+    if ( !strftime(state, MOD_CK_SIZE, TMFMT, localtime(&current)) ) {
         syslog(LOG_ERR, "strftime() returned 0\n");
         return EXIT_FAILURE;
     } return EXIT_SUCCESS;

@@ -42,7 +42,6 @@
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
 #define LNFMT " E: %s | %s: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
 #define STCHR "\n"
-#define LNSZE 155
 
 #define EN_INTERVAL 60
 #define WL_INTERVAL 30
@@ -50,6 +49,56 @@
 #define BT_INTERVAL 30
 #define TM_INTERVAL 15
 #define PT_INTERVAL 15
+
+#define ENABLE_MOD_EN 1
+#define ENABLE_MOD_WL 1
+#define ENABLE_MOD_AU 1
+#define ENABLE_MOD_BT 1
+#define ENABLE_MOD_CK 1
+
+#if !(ENABLE_MOD_EN || ENABLE_MOD_WL || ENABLE_MOD_AU || ENABLE_MOD_BT || ENABLE_MOD_CK)
+    #error "You must enable at least one module"
+#endif
+
+/* Module-Dependent Configuration */
+#define MODSEP 3
+
+#if ENABLE_MOD_EN == 1
+    #define MOD_EN_SIZE (5 + MODSEP)
+#else
+    #define MOD_EN_SIZE 0
+#endif
+
+#if ENABLE_MOD_WL == 1
+    #define MOD_WL_SIZE (IW_ESSID_MAX_SIZE + 24 + MODSEP)
+#else
+    #define MOD_WL_SIZE 0
+#endif
+
+#if ENABLE_MOD_AU == 1
+    #define MOD_AU_SIZE (8 + MODSEP)
+#else
+    #define MOD_AU_SIZE 0
+#endif
+
+#if ENABLE_MOD_BT == 1
+    #define MOD_BT_SIZE (39 + MODSEP)
+#else
+    #define MOD_BT_SIZE 0
+#endif
+
+#if ENABLE_MOD_CK == 1
+    #define MOD_CK_SIZE 43
+#else
+    #define MOD_CK_SIZE 0
+#endif
+
+#define LNSZE ( MOD_EN_SIZE \
+              + MOD_WL_SIZE \
+              + MOD_AU_SIZE \
+              + MOD_BT_SIZE \
+              + MOD_CK_SIZE \
+              + 1           )
 
 static const char wl_bars [][22] = {
     "No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"

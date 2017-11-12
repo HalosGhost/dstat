@@ -8,7 +8,7 @@ BSHDIR ?= $(DESTDIR)$(PREFIX)/share/bash-completions
 
 CC = clang
 LDFLAGS = `pkg-config --libs-only-l x11 alsa`
-CFLAGS ?= -g -O2 -fPIE -pie -D_FORTIFY_SOURCE=2 -fstack-protector-strong --param=ssp-buffer-size=1 -Weverything -Werror -std=c11 -fsanitize=undefined -fsanitize-trap=undefined -Wl,-z,relro,-z,now
+CFLAGS ?= -g -flto -O2 -fPIE -pie -D_FORTIFY_SOURCE=2 -fstack-protector-strong --param=ssp-buffer-size=1 -Weverything -Werror -std=c11 -fsanitize=undefined -fsanitize-trap=undefined -Wl,-z,relro,-z,now
 
 .PHONY: all clean cov-build install uninstall
 
