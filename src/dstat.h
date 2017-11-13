@@ -83,7 +83,7 @@
 #endif
 
 #if ENABLE_MOD_BT == 1
-    #define MOD_BT_SIZE (39 + MODSEP)
+    #define MOD_BT_SIZE (47 + MODSEP)
 #else
     #define MOD_BT_SIZE 0
 #endif
