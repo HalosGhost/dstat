@@ -29,6 +29,7 @@
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
+#define FAIL_IOCTL(x) "Failed to execute " x " ioctl"
 
 /* Personal Configuration */
 #define EFACE "en0"

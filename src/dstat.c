@@ -208,7 +208,26 @@ get_wl_strength (uint8_t * strength) {
 
     check_null_arg(strength);
 
+    signed sock = socket(AF_INET, SOCK_DGRAM, 0);
+    struct iwreq w;
+    struct iw_range range;
+
+    strncpy(w.ifr_ifrn.ifrn_name, WFACE, IFNAMSIZ);
+
+    w.u.data.pointer = &range;
+    w.u.data.length = sizeof (struct iw_range);
+    w.u.data.flags = 0;
+
     signed errsv = 0;
+    errno = 0;
+    if ( ioctl(sock, SIOCGIWRANGE, &w) == -1 ) {
+        errsv = errno;
+        syslog(LOG_ERR, FAIL_IOCTL("SIOCGIWRANGE") ": %s\n", strerror(errsv));
+        close(sock);
+        return EXIT_FAILURE;
+    } close(sock);
+
+    errsv = 0;
     errno = 0;
     FILE * in = fopen(WPATH, "r");
     if ( !in ) {
@@ -225,7 +244,8 @@ get_wl_strength (uint8_t * strength) {
         n = 0;
     } fclose(in);
 
-    *strength = !n ? n : n * 7 / 100;
+    *strength = !n ? n : n * 7 / range.max_qual.qual;
+
     return EXIT_SUCCESS;
 }
 
@@ -246,8 +266,14 @@ get_wl_essid (char * ssid) {
     w.u.data.length = IW_ESSID_MAX_SIZE;
     w.u.data.flags = 0;
 
-    ioctl(sock, SIOCGIWESSID, &w);
-    close(sock);
+    signed errsv = 0;
+    errno = 0;
+    if ( ioctl(sock, SIOCGIWESSID, &w) == -1 ) {
+        errsv = errno;
+        syslog(LOG_ERR, FAIL_IOCTL("SIOCGIWESSID") ": %s\n", strerror(errsv));
+        close(sock);
+        return EXIT_FAILURE;
+    } close(sock);
 
     return EXIT_SUCCESS;
 }
