@@ -412,7 +412,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
 
     static long running = 0;
     static long samples = 0;
-    if ( samples < 0 || samples == LONG_MAX || *pow < 0 == power < 0) {
+    if ( samples < 0 || samples == LONG_MAX || *pow < 0 != power < 0) {
         samples = 1;
         running = 0;
     } else {
