@@ -390,7 +390,15 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
     charge_full_design /= 1000;
 
     long rate = power_now ? power_now : current_now;
-    for ( rate = (!rate || rate == LONG_MIN) ? LONG_MAX : -rate; rate >= 10000; rate /= 10 );
+    if ( !rate ) {
+        rate = 1;
+    } else if ( rate == LONG_MIN ) {
+        rate = LONG_MAX;
+    } else if ( rate < 0 ) {
+        rate = -rate;
+    }
+
+    for ( ; rate >= 10000; rate /= 10 );
 
     unsigned long max_capacity = charge_full        ? charge_full        :
                                  energy_full        ? energy_full        :
