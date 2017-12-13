@@ -271,8 +271,6 @@ get_wl_essid (char * ssid) {
     if ( ioctl(sock, SIOCGIWESSID, &w) == -1 ) {
         errsv = errno;
         syslog(LOG_ERR, FAIL_IOCTL("SIOCGIWESSID") ": %s\n", strerror(errsv));
-        close(sock);
-        return EXIT_FAILURE;
     } close(sock);
 
     return EXIT_SUCCESS;
