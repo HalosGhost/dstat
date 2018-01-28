@@ -411,17 +411,21 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
         power *= -1;
     }
 
+    double power_old = *pow;
+    *pow = power;
+    if ( status != CHARGING && status != DISCHARGING ) {
+        return EXIT_SUCCESS;
+    }
+
     static long running;
     static long samples;
-    if ( samples == LONG_MAX || running > INT_MAX - rate || *pow < 0 != power < 0) {
+    if ( samples == LONG_MAX || running > INT_MAX - rate || power_old < 0 != power < 0) {
         samples = 1;
         running = rate;
     } else {
         ++samples;
         running += rate;
     }
-
-    *pow = power;
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
     unsigned long hours = seconds / 3600;
