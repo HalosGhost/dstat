@@ -41,7 +41,6 @@
 #define BPATH "/sys/class/power_supply/" BATDV
 #define BTFMT " %.2lu:%.2lu till %s"
 #define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
-#define LNFMT " E: %s | %s: %s | A: %ld%s | B: %" PRIu8 "%% (%+.2lgW)%s | %s%s"
 #define STCHR "\n"
 
 #define EN_INTERVAL 60
@@ -62,28 +61,28 @@
 #endif
 
 /* Module-Dependent Configuration */
-#define MODSEP 3
+#define MODSEP 4
 
 #if ENABLE_MOD_EN == 1
-    #define MOD_EN_SIZE (5 + MODSEP)
+    #define MOD_EN_SIZE 5
 #else
     #define MOD_EN_SIZE 0
 #endif
 
 #if ENABLE_MOD_WL == 1
-    #define MOD_WL_SIZE (IW_ESSID_MAX_SIZE + 24 + MODSEP)
+    #define MOD_WL_SIZE (IW_ESSID_MAX_SIZE + 24)
 #else
     #define MOD_WL_SIZE 0
 #endif
 
 #if ENABLE_MOD_AU == 1
-    #define MOD_AU_SIZE (8 + MODSEP)
+    #define MOD_AU_SIZE 8
 #else
     #define MOD_AU_SIZE 0
 #endif
 
 #if ENABLE_MOD_BT == 1
-    #define MOD_BT_SIZE (47 + MODSEP)
+    #define MOD_BT_SIZE 47
 #else
     #define MOD_BT_SIZE 0
 #endif
@@ -99,7 +98,7 @@
               + MOD_AU_SIZE \
               + MOD_BT_SIZE \
               + MOD_CK_SIZE \
-              + 1           )
+              + 5 * MODSEP + 1)
 
 static const char wl_bars [][22] = {
     "No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"

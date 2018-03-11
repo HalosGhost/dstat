@@ -121,25 +121,37 @@ main (signed argc, char * argv []) {
             #define write_mod(size, fmt, ...) amount_written += snprintf( \
                 status_line + amount_written, (size), (fmt), __VA_ARGS__)
 
+            #define write_sep() do { \
+                if ( amount_written > 1 ) { write_mod(MODSEP, "%s", " | "); } \
+            } while (0)
+
             #if ENABLE_MOD_EN == 1
-                write_mod(MOD_EN_SIZE, "E: %s | ", en_state);
+                write_mod(MOD_EN_SIZE, "E: %s", en_state);
             #endif
 
             #if ENABLE_MOD_WL == 1
-                write_mod(MOD_WL_SIZE, "%s: %s | ", wl_essid, \
+                write_sep();
+
+                write_mod(MOD_WL_SIZE, "%s: %s", wl_essid, \
                           wl_bars[*wl_strength]);
             #endif
 
             #if ENABLE_MOD_AU == 1
-                write_mod(MOD_AU_SIZE, "A: %ld%s | ", *audio_vol, audio_mut);
+                write_sep();
+
+                write_mod(MOD_AU_SIZE, "A: %ld%s", *audio_vol, audio_mut);
             #endif
 
             #if ENABLE_MOD_BT == 1
-                write_mod(MOD_BT_SIZE, "B: %" PRIu8 "%% (%+.2lgW)%s | ", \
+                write_sep();
+
+                write_mod(MOD_BT_SIZE, "B: %" PRIu8 "%% (%+.2lgW)%s", \
                           *bat_cap, *bat_pow, bat_time);
             #endif
 
             #if ENABLE_MOD_CK == 1
+                write_sep();
+
                 write_mod(MOD_CK_SIZE, "%s", time_state);
             #endif
 
