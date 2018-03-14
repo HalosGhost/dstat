@@ -26,6 +26,7 @@ usage () {
 
     printf "  --paint-ival='#'   Repaint the bar every # seconds (default: 15)\n"
     printf "  --out-char='C'     Paint C for line-endings for stdout (default: '\\\n')\n"
+    printf "  --mod-sep='S'      Paint S for module separations (default: ' | ')\n"
     printf "  --reset-config     Reset configuration to the defaults\n"
 }
 
@@ -46,10 +47,11 @@ default_config () {
     update_num VL_INTERVAL 30
     update     BATDV       BAT0
     update_num BT_INTERVAL 30
-    update     TMFMT       '%H.%M (%Z) | %A, %d %B %Y'
+    update     TMFMT       '"%H.%M (%Z)" MODSEP "%A, %d %B %Y"'
     update_num TM_INTERVAL 15
     update_num PT_INTERVAL 15
     update     STCHR       '\\n'
+    update     MODSEP      ' | '
 
     update_num ENABLE_MOD_EN 1
     update_num ENABLE_MOD_WL 1
@@ -90,6 +92,7 @@ show_config () {
 
     show_value 'Bar Repaint Interval' PT_INTERVAL
     show_value 'Stdout Line Ending' STCHR
+    show_value 'Module Separator' MODSEP
 }
 
 for i in "$@"; do
@@ -109,6 +112,7 @@ for i in "$@"; do
         --CK-ival=*)    update_num TM_INTERVAL            "${i#*=}"; shift;;
         --paint-ival=*) update_num PT_INTERVAL            "${i#*=}"; shift;;
         --out-char=*)   update     STCHR                  "${i#*=}"; shift;;
+        --mod-sep=*)    update     MODSEP                 "${i#*=}"; shift;;
         --reset-config) default_config;;
     esac
 done

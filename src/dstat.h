@@ -40,7 +40,8 @@
 #define BATDV "BAT0"
 #define BPATH "/sys/class/power_supply/" BATDV
 #define BTFMT " %.2lu:%.2lu till %s"
-#define TMFMT "%H.%M (%Z) | %A, %d %B %Y"
+#define MODSEP " | "
+#define TMFMT "%H.%M (%Z)" MODSEP "%A, %d %B %Y"
 #define STCHR "\n"
 
 #define EN_INTERVAL 60
@@ -56,12 +57,19 @@
 #define ENABLE_MOD_BT 1
 #define ENABLE_MOD_CK 1
 
-#if !(ENABLE_MOD_EN || ENABLE_MOD_WL || ENABLE_MOD_AU || ENABLE_MOD_BT || ENABLE_MOD_CK)
+#define MODS_ENABLED ( \
+    ENABLE_MOD_EN    + \
+    ENABLE_MOD_WL    + \
+    ENABLE_MOD_AU    + \
+    ENABLE_MOD_BT    + \
+    ENABLE_MOD_CK    )
+
+#if !(MODS_ENABLED)
     #error "You must enable at least one module"
 #endif
 
 /* Module-Dependent Configuration */
-#define MODSEP 4
+#define SEPLN (sizeof MODSEP)
 
 #if ENABLE_MOD_EN == 1
     #define MOD_EN_SIZE 5
@@ -88,7 +96,7 @@
 #endif
 
 #if ENABLE_MOD_CK == 1
-    #define MOD_CK_SIZE 43
+    #define MOD_CK_SIZE (40 + SEPLN)
 #else
     #define MOD_CK_SIZE 0
 #endif
@@ -98,7 +106,7 @@
               + MOD_AU_SIZE \
               + MOD_BT_SIZE \
               + MOD_CK_SIZE \
-              + 5 * MODSEP + 1)
+              + 5 * SEPLN + 1)
 
 static const char wl_bars [][22] = {
     "No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"

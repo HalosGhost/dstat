@@ -122,7 +122,7 @@ main (signed argc, char * argv []) {
                 status_line + amount_written, (size), (fmt), __VA_ARGS__)
 
             #define write_sep() do { \
-                if ( amount_written > 1 ) { write_mod(MODSEP, "%s", " | "); } \
+                if ( amount_written > 1 ) { write_mod(SEPLN, "%s", MODSEP); } \
             } while (0)
 
             #if ENABLE_MOD_EN == 1
