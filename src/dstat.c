@@ -7,19 +7,12 @@
         } \
     } while ( false )
 
-#define general_termination() \
-    do { \
-        syslog(LOG_INFO, "Terminating\n"); \
-        snd_hctl_close(alsa_handle); \
-        if ( alsa_control ) { snd_ctl_elem_value_free(alsa_control); } \
-        if ( alsa_sid ) { snd_ctl_elem_id_free(alsa_sid); } \
-        if ( dpy ) { \
-            XCloseDisplay(dpy); \
-        } else { \
-            printf("\x1b[?25h"); \
-        } \
-        closelog(); \
-    } while ( false )
+// made file-scoped to allow for async-signal-safe signal-handling
+static long running;
+static long samples;
+
+static signed run_state;
+static signed caught_signum;
 
 signed
 main (signed argc, char * argv []) {
@@ -27,10 +20,6 @@ main (signed argc, char * argv []) {
     signed status = EXIT_SUCCESS;
     openlog(NULL, LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Starting\n");
-
-    signal(2, signal_handler);
-    signal(3, signal_handler);
-    signal(15, signal_handler);
 
     #if ENABLE_MOD_EN == 1
         char en_state [2] = "D";
@@ -91,7 +80,29 @@ main (signed argc, char * argv []) {
         fputs("\x1b[?25l", stdout);
     }
 
+    hup:
+        run_state = 0;
+        samples = 0;
+        running = 0;
+
+    signal(SIGINT, signal_handler);
+    signal(SIGHUP, signal_handler);
+    signal(SIGQUIT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
+        switch ( run_state ) {
+            case 1:
+                syslog(LOG_INFO, "Caught %s\n", sys_siglist[caught_signum]);
+                goto cleanup;
+
+            case 2:
+                syslog(LOG_INFO, "Reloading\n");
+                goto hup;
+
+            default: break;
+        }
+
         #if ENABLE_MOD_EN == 1
             UPDATE_MODULE_AT(get_en_state(en_state), EN_INTERVAL);
         #endif
@@ -168,16 +179,28 @@ main (signed argc, char * argv []) {
     }
 
     cleanup:
-        general_termination();
+        syslog(LOG_INFO, "Terminating\n");
+
+        snd_hctl_close(alsa_handle);
+        if ( alsa_control ) { snd_ctl_elem_value_free(alsa_control); }
+        if ( alsa_sid ) { snd_ctl_elem_id_free(alsa_sid); }
+
+        if ( dpy ) {
+            XCloseDisplay(dpy);
+        } else {
+            printf("\x1b[?25h");
+        }
+
+        closelog();
+
         return status;
 }
 
 void
 signal_handler (signed signum) {
 
-    syslog(LOG_INFO, "Caught %s\n", sys_siglist[signum]);
-    general_termination();
-    exit(EXIT_SUCCESS);
+    run_state = 1 + (signum == SIGHUP);
+    caught_signum = signum;
 }
 
 #define check_null_arg(ptr) \
@@ -239,7 +262,6 @@ get_wl_strength (uint8_t * strength) {
         return EXIT_FAILURE;
     } close(sock);
 
-    errsv = 0;
     errno = 0;
     FILE * in = fopen(WPATH, "r");
     if ( !in ) {
@@ -388,6 +410,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
     *cap = capacity;
 
     voltage_now /= 1000;
+    voltage_now = voltage_now ? voltage_now : 1;
 
     power_now   /= 1000;
     current_now /= 1000;
@@ -429,8 +452,6 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
         return EXIT_SUCCESS;
     }
 
-    static long running;
-    static long samples;
     if ( samples == LONG_MAX || running > INT_MAX - rate || power_old < 0 != power < 0) {
         samples = 1;
         running = rate;

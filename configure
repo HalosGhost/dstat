@@ -47,7 +47,7 @@ default_config () {
     update_num VL_INTERVAL 30
     update     BATDV       BAT0
     update_num BT_INTERVAL 30
-    update     TMFMT       '"%H.%M (%Z)" MODSEP "%A, %d %B %Y"'
+    update     TMFMT       '%H.%M (%Z)" MODSEP "%A, %d %B %Y'
     update_num TM_INTERVAL 15
     update_num PT_INTERVAL 15
     update     STCHR       '\\n'

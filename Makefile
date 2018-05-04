@@ -6,17 +6,18 @@ BINDIR ?= $(DESTDIR)$(PREFIX)/bin
 ZSHDIR ?= $(DESTDIR)$(PREFIX)/share/zsh
 BSHDIR ?= $(DESTDIR)$(PREFIX)/share/bash-completions
 
-CC = clang
-LDFLAGS = `pkg-config --libs-only-l x11 alsa`
-CFLAGS ?= -g -flto -O2 -fPIE -pie -D_FORTIFY_SOURCE=2 -fstack-protector-strong --param=ssp-buffer-size=1 -Weverything -Werror -std=c11 -fsanitize=undefined -fsanitize-trap=undefined -Wl,-z,relro,-z,now
-
+include Makerules
+CFLAGS += -Wno-invalid-noreturn
 .PHONY: all clean cov-build install uninstall
 
 all: dist
 	@$(CC) $(CFLAGS) $(LDFLAGS) src/dstat.c -o dist/$(PROGNM)
 
+clang-analyze:
+	@(pushd ./src; clang-check -analyze ./*.c)
+
 clean:
-	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh
+	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh ./src/*.plist
 
 cov-build: dist clean
 	@cov-build --dir cov-int make
