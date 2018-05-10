@@ -11,8 +11,8 @@
 static long running;
 static long samples;
 
-static signed run_state;
-static signed caught_signum;
+static volatile sig_atomic_t run_state;
+static volatile sig_atomic_t caught_signum;
 
 signed
 main (signed argc, char * argv []) {
@@ -200,7 +200,7 @@ void
 signal_handler (signed signum) {
 
     run_state = 1 + (signum == SIGHUP);
-    caught_signum = signum;
+    caught_signum = (sig_atomic_t )signum;
 }
 
 #define check_null_arg(ptr) \
