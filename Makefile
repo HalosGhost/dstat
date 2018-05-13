@@ -7,7 +7,6 @@ ZSHDIR ?= $(DESTDIR)$(PREFIX)/share/zsh
 BSHDIR ?= $(DESTDIR)$(PREFIX)/share/bash-completions
 
 include Makerules
-CFLAGS += -Wno-invalid-noreturn
 .PHONY: all clean cov-build install uninstall
 
 all: dist

@@ -131,7 +131,7 @@ static snd_hctl_t * alsa_handle;
 static snd_ctl_elem_id_t * alsa_sid;
 static snd_ctl_elem_value_t * alsa_control;
 
-_Noreturn void
+void
 signal_handler (signed);
 
 signed
