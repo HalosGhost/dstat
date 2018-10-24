@@ -90,7 +90,7 @@
 #endif
 
 #if ENABLE_MOD_BT == 1
-    #define MOD_BT_SIZE 47
+    #define MOD_BT_SIZE 48
 #else
     #define MOD_BT_SIZE 0
 #endif
@@ -101,12 +101,13 @@
     #define MOD_CK_SIZE 0
 #endif
 
-#define LNSZE ( MOD_EN_SIZE \
-              + MOD_WL_SIZE \
-              + MOD_AU_SIZE \
-              + MOD_BT_SIZE \
-              + MOD_CK_SIZE \
-              + 5 * SEPLN + 1)
+#define LNSZE ( MOD_EN_SIZE  \
+              + MOD_WL_SIZE  \
+              + MOD_AU_SIZE  \
+              + MOD_BT_SIZE  \
+              + MOD_CK_SIZE  \
+              + MODS_ENABLED * 2 \
+              + MODS_ENABLED * SEPLN + 1)
 
 static const char wl_bars [][22] = {
     "No Signal", "▂", "▂▃", "▂▃▄", "▂▃▄▅", "▂▃▄▅▆", "▂▃▄▅▆▇", "▂▃▄▅▆▇█"

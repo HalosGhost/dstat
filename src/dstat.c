@@ -156,8 +156,16 @@ main (signed argc, char * argv []) {
             #if ENABLE_MOD_BT == 1
                 write_sep();
 
+                if ( *bat_cap <= 15 ) {
+                    write_mod(2, "%1c", 3 + !(*bat_cap > 5));
+                }
+
                 write_mod(MOD_BT_SIZE, "B: %" PRIu8 "%% (%+.2lgW)%s", \
                           *bat_cap, *bat_pow, bat_time);
+
+                if ( *bat_cap <= 15 ) {
+                    write_mod(2, "%1c", 1);
+                }
             #endif
 
             #if ENABLE_MOD_CK == 1

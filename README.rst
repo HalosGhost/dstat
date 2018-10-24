@@ -13,5 +13,5 @@ However, through adding such functionality, also added is an extra level of comp
 
 In addition, this status monitor allows writing to ``stdout``, so it will work with any status bar that can read from ``stdin``.
 
-This is a very small status program (~18KiB when built normally, and stripped) that aims to be functional and flexible but primarily small and fast.
+This is a very small status program (~24KiB when built normally and stripped) that aims to be functional and flexible but primarily small and fast.
 Each module is fairly self-explanatory, and the defaults are meant to be as sane as possible.
