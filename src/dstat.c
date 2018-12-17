@@ -10,6 +10,7 @@
 // made file-scoped to allow for async-signal-safe signal-handling
 static long running;
 static long samples;
+static bool color_flag = false;
 
 static volatile sig_atomic_t run_state;
 static volatile sig_atomic_t caught_signum;
@@ -42,6 +43,7 @@ main (signed argc, char * argv []) {
     #endif
 
     bool stdout_flag = false;
+    char color_arg [7] = "";
     char status_line [LNSZE] = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
@@ -61,14 +63,18 @@ main (signed argc, char * argv []) {
 
     snd_ctl_elem_id_set_interface(alsa_sid, SND_CTL_ELEM_IFACE_MIXER);
 
-    const char * vos = "hs";
+    const char * vos = "hsc:";
     for ( signed oi = 0, c = getopt_long(argc, argv, vos, os, &oi);
           c != -1; c = getopt_long(argc, argv, vos, os, &oi) ) {
         switch ( c ) {
+            case 'c': snprintf(color_arg, 7, "%s", optarg); break;
             case 'h': puts(usage_str); goto cleanup;
             case 's': stdout_flag = true; break;
         }
     }
+
+    color_flag = !strncmp(color_arg, "auto", 4) ? !stdout_flag :
+                 !strncmp(color_arg, "always", 7);
 
     if ( !stdout_flag ) {
         dpy = XOpenDisplay(NULL);
@@ -156,7 +162,7 @@ main (signed argc, char * argv []) {
             #if ENABLE_MOD_BT == 1
                 write_sep();
 
-                if ( *bat_cap <= 15 ) {
+                if ( color_flag && *bat_cap <= 15 ) {
                     write_mod(2, "%1c", 3 + !(*bat_cap > 5));
                 }
 

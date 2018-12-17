@@ -116,6 +116,7 @@ static const char wl_bars [][22] = {
 static struct option os [] = {
     { "help",   0, 0, 'h' },
     { "stdout", 0, 0, 's' },
+    { "color",  1, 0, 'c' },
     { 0,        0, 0, 0   }
 };
 
@@ -123,8 +124,13 @@ static const char usage_str [] =
     "Usage: dstat [option ...]\n"
     "dstat -- a simple dwm/stdout status program\n\n"
     "Options:\n"
-    "  -h, --help      Print this help and exit\n"
-    "  -s, --stdout    Output to stdout";
+    "  -c, --color=<val>  Output with dwm-compatible\n"
+    "                     color escapes. Valid values:\n"
+    "                      - auto (default)\n"
+    "                      - always\n"
+    "                      - never\n"
+    "  -h, --help         Print this help and exit\n"
+    "  -s, --stdout       Output to stdout";
 
 static Display * dpy;
 extern const char * const sys_siglist [];
