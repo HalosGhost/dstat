@@ -469,7 +469,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
     }
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
-    unsigned long hours = seconds / 3600;
+    unsigned long hours = seconds / 3600 > 999 ? 999 : seconds / 3600;
     unsigned long minutes = (seconds - hours * 3600) / 60;
 
     const char * when = status == CHARGING ? "replenished" : "depleted";
