@@ -124,13 +124,11 @@ static const char usage_str [] =
     "Usage: dstat [option ...]\n"
     "dstat -- a simple dwm/stdout status program\n\n"
     "Options:\n"
-    "  -c, --color=<val>  Output with dwm-compatible\n"
-    "                     color escapes. Valid values:\n"
-    "                      - auto (default)\n"
-    "                      - always\n"
-    "                      - never\n"
-    "  -h, --help         Print this help and exit\n"
-    "  -s, --stdout       Output to stdout";
+    "  -c, --color=<when>   Color modules for dwm; <when>\n"
+    "                       can be \"auto\" (default),\n"
+    "                       \"always\", or \"never\"\n"
+    "  -h, --help           Print this help and exit\n"
+    "  -s, --stdout         Output to stdout";
 
 static Display * dpy;
 extern const char * const sys_siglist [];

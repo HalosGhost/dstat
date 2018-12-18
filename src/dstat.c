@@ -43,7 +43,7 @@ main (signed argc, char * argv []) {
     #endif
 
     bool stdout_flag = false;
-    char color_arg [7] = "";
+    char color_arg [7] = "auto";
     char status_line [LNSZE] = "";
 
     snd_ctl_elem_id_malloc(&alsa_sid);
