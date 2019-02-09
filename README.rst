@@ -1,12 +1,6 @@
 dstat
 -----
 
-|coverity|
-
-.. |coverity| image:: https://img.shields.io/coverity/scan/7913.svg
-   :alt:              Coverity Scan Build Status
-   :target:           https://scan.coverity.com/projects/halosghost-dstat
-
 A lot of other status monitors for `dwm <http://dwm.suckless.org/>`_ attempt to have an extensible plugin style.
 There is nothing wrong with doing so, and it does allow for greater simplicity for new users.
 However, through adding such functionality, also added is an extra level of complexity.
