@@ -7,13 +7,13 @@ ZSHDIR ?= $(DESTDIR)$(PREFIX)/share/zsh
 BSHDIR ?= $(DESTDIR)$(PREFIX)/share/bash-completions
 
 include Makerules
-.PHONY: all clean cov-build install uninstall
+.PHONY: all clean cov-build scan-build install uninstall
 
 all: dist
 	@$(CC) $(CFLAGS) $(LDFLAGS) src/dstat.c -o dist/$(PROGNM)
 
-clang-analyze:
-	@(pushd ./src; clang-check -analyze ./*.c)
+scan-build:
+	@scan-build --use-cc=$(CC) make
 
 clean:
 	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh ./src/*.plist
