@@ -4,7 +4,7 @@ pkgname=dstat-git
 pkgver=0
 pkgrel=1
 
-pkgdesc="A small status program for dwm"
+pkgdesc="A small status program"
 url='https://github.com/HalosGhost/dstat'
 arch=('i686' 'x86_64')
 license=('GPL2')

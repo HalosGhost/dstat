@@ -1,7 +1,7 @@
 dstat
 -----
 
-A lot of other status monitors for `dwm <http://dwm.suckless.org/>`_ attempt to have an extensible plugin style.
+A lot of other simple status monitors attempt to have an extensible plugin style.
 There is nothing wrong with doing so, and it does allow for greater simplicity for new users.
 However, through adding such functionality, also added is an extra level of complexity.
 

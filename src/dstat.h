@@ -122,9 +122,9 @@ static struct option os [] = {
 
 static const char usage_str [] =
     "Usage: dstat [option ...]\n"
-    "dstat -- a simple dwm/stdout status program\n\n"
+    "dstat -- a simple status program\n\n"
     "Options:\n"
-    "  -c, --color=<when>   Color modules for dwm; <when>\n"
+    "  -c, --color=<when>   Color modules; <when>\n"
     "                       can be \"auto\" (default),\n"
     "                       \"always\", or \"never\"\n"
     "  -h, --help           Print this help and exit\n"
