@@ -452,6 +452,9 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
                                  charge_full_design ? charge_full_design :
                                  energy_full_design ? energy_full_design : 0;
     unsigned long cur_capacity = charge_now ? charge_now : energy_now;
+    if ( !cur_capacity ) {
+        cur_capacity = max_capacity * capacity / 100;
+    }
 
     unsigned long target = cur_capacity;
     double power = (signed long )-voltage_now * rate / 1000000.;
