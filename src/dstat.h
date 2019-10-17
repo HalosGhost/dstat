@@ -25,7 +25,7 @@
 #include <linux/wireless.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <stropts.h>
+#include <sys/ioctl.h>
 
 #define FAIL_OPEN(x) "Failed to open " x
 #define FAIL_READ(x) "Failed to read from " x
