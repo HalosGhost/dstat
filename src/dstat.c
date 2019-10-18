@@ -485,8 +485,6 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
 
     if ( hours || minutes || seconds ) {
         snprintf(time, 25, BTFMT, hours, minutes, when);
-    } else {
-        snprintf(time, 2, "");
     } return EXIT_SUCCESS;
 }
 
