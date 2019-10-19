@@ -469,7 +469,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
         return EXIT_SUCCESS;
     }
 
-    if ( samples == LONG_MAX || running > INT_MAX - rate || power_old < 0 != power < 0) {
+    if ( samples == LONG_MAX || running > INT_MAX - rate || (power_old < 0) != (power < 0) ) {
         samples = 1;
         running = rate;
     } else {
