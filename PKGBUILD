@@ -27,7 +27,7 @@ prepare () {
 
 build () {
     cd dstat
-    make
+    CC=clang make
 }
 
 package () {
