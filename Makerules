@@ -1,11 +1,11 @@
 CC ?= clang
 LDFLAGS = `pkg-config --libs-only-l x11 alsa`
-CFLAGS ?= -g -ggdb -O3 -fPIE -flto -fstack-protector-strong --param=ssp-buffer-size=1 -Wno-reserved-id-macro -Wall -Wextra -Wpedantic -Werror -std=gnu18 -fsanitize=undefined
+CFLAGS ?= -g -ggdb -O3 -fPIE -flto -fstack-protector-strong --param=ssp-buffer-size=1 -Wall -Wextra -Wpedantic -Werror -std=gnu18 -fsanitize=undefined
 
 ifneq ($(CC), tcc)
 CFLAGS += -pie -D_FORTIFY_SOURCE=2 -Wl,-z,relro,-z,now
 endif
 
 ifeq ($(CC), clang)
-CFLAGS += -Weverything -fsanitize-trap=undefined
+CFLAGS += -Weverything -fsanitize-trap=undefined -Wno-reserved-id-macro
 endif
