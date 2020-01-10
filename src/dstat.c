@@ -381,7 +381,8 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
                   charge_full = 0,
                   charge_full_design = 0,
                   energy_now = 0,
-                  charge_now = 0;
+                  charge_now = 0,
+                  time_to_empty = 0;
     uint8_t capacity = 0;
 
     char keybuf [64] = "", // pretty sure it should never be larger than 32
@@ -414,6 +415,8 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
             sscanf(val, "%lu", &energy_now);
         } else if ( !strncmp(key, "CHARGE_NOW", 10) ) {
             sscanf(val, "%lu", &charge_now);
+        } else if ( !strncmp(key, "TIME_TO_EMPTY", 13) ) {
+            sscanf(val, "%lu", &time_to_empty);
         } else if ( !strncmp(key, "CAPACITY", 8) ) {
             sscanf(val, "%" SCNu8, &capacity);
         }
@@ -478,6 +481,10 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
     }
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
+    if ( !seconds && time_to_empty ) {
+        seconds = time_to_empty * 60;
+    }
+
     unsigned long hours = seconds / 3600 > 999 ? 999 : seconds / 3600;
     unsigned long minutes = (seconds - hours * 3600) / 60;
 
