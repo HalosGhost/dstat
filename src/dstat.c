@@ -415,7 +415,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
             sscanf(val, "%lu", &energy_now);
         } else if ( !strncmp(key, "CHARGE_NOW", 10) ) {
             sscanf(val, "%lu", &charge_now);
-        } else if ( !strncmp(key, "TIME_TO_EMPTY", 13) ) {
+        } else if ( !strncmp(key, "TIME_TO_EMPTY_NOW", 17) ) {
             sscanf(val, "%lu", &time_to_empty);
         } else if ( !strncmp(key, "CAPACITY", 8) ) {
             sscanf(val, "%" SCNu8, &capacity);
