@@ -385,12 +385,10 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
                   time_to_empty = 0;
     uint8_t capacity = 0;
 
-    char keybuf [64] = "", // pretty sure it should never be larger than 32
-         val    [64] = "";
+    char key [41] = "",
+         val [23] = "";
 
-    while ( fscanf(in, "%[^=]=%s\n", keybuf, val) != EOF ) {
-        char * key = keybuf + sizeof("POWER_SUPPLY_") - 1; // ignore nul byte
-
+    while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
         if ( !strncmp(key, "STATUS", 6) ) {
             switch ( val[0] ) {
                 case 'D': status = DISCHARGING; break;
