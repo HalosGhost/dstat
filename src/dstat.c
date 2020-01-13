@@ -480,7 +480,7 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
 
     unsigned long seconds = 3600 * target / (unsigned long )(running / samples);
     if ( !seconds && time_to_empty ) {
-        seconds = time_to_empty * 60;
+        seconds = time_to_empty;
     }
 
     unsigned long hours = seconds / 3600 > 999 ? 999 : seconds / 3600;
