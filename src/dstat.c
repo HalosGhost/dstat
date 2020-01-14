@@ -385,8 +385,8 @@ get_bat_state (uint8_t * cap, double * pow, char * time) {
                   time_to_empty = 0;
     uint8_t capacity = 0;
 
-    char key [41] = "",
-         val [23] = "";
+    char key [sizeof "CONSTANT_CHARGE_CURRENT_MAX"] = "",
+         val [24] = "";
 
     while ( fscanf(in, "POWER_SUPPLY_%[^=]=%s\n", key, val) != EOF ) {
         if ( !strncmp(key, "STATUS", 6) ) {
