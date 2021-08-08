@@ -1,9 +1,7 @@
 #pragma once
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreserved-id-macro"
 #define _POSIX_C_SOURCE 1
-#pragma clang diagnostic pop
+#define _DEFAULT_SOURCE 1
 
 #include <stdint.h>
 #include <inttypes.h>

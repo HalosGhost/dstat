@@ -99,7 +99,7 @@ main (signed argc, char * argv []) {
     for ( time_t c_time = 0; ; c_time = time(NULL) ) {
         switch ( run_state ) {
             case 1:
-                syslog(LOG_INFO, "Caught %s\n", sys_siglist[caught_signum]);
+                syslog(LOG_INFO, "Caught %s\n", strsignal(caught_signum));
                 goto cleanup;
 
             case 2:
